@@ -1,0 +1,157 @@
+@use "sass:map";
+@use "sass:string";
+
+@function str-split($string, $separator) {
+  $i: string.index($string, $separator);
+  @if $i != null {
+    @return append(
+      string.slice($string, 1, $i - 1),
+      string.split(string.slice($string, $i + string.length($separator)), $separator)
+    );
+  }
+  @return $string;
+}
+
+@mixin themed($selector: '', $theme: null) {
+  $themes: (light, dark);
+
+  @if $theme == null {
+    @each $th in $themes {
+      @each $s in string.split($selector, ',') {
+        [theme=#{$th}] #{$s} {
+          @content;
+        }
+      }
+    }
+  }
+  @else {
+    @each $s in string.split($selector, ',') {
+      [theme=#{$theme}] #{$s} {
+        @content;
+      }
+    }
+  }
+}
+
+@mixin light() {
+  [theme=light] & {
+    @content;
+  }
+}
+
+@mixin dark() {
+  [theme=dark] & {
+    @content;
+  }
+}
+
+@mixin createTippyTheme($theme, $bgColor, $textColor) {
+  .tippy-box[data-theme~='#{$theme}'] {
+    @apply font-medium;
+    background-color: $bgColor;
+    color: $textColor;
+  }
+
+  .tippy-box[data-theme~='#{$theme}'][data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: $bgColor;
+  }
+
+  .tippy-box[data-theme~='#{$theme}'][data-placement^='bottom'] > .tippy-arrow::before {
+    border-bottom-color: $bgColor;
+  }
+
+  .tippy-box[data-theme~='#{$theme}'][data-placement^='left'] > .tippy-arrow::before {
+    border-left-color: $bgColor;
+  }
+
+  .tippy-box[data-theme~='#{$theme}'][data-placement^='right'] > .tippy-arrow::before {
+    border-right-color: $bgColor;
+  }
+}
+
+// -------------------------------------
+// Css itself
+// -------------------------------------
+
+html {
+  background-color: theme('colors.background') !important;
+  color: theme('colors.text') !important;
+}
+
+@include themed('.n-button.n-button--tertiary-type', 'light') {
+  .n-button__border {
+    border: 1px solid theme('colors.disabled-background') !important;
+  }
+
+  .n-button__state-border {
+    border: none !important;
+  }
+
+  &:not(.n-button--disabled):hover {
+    background: theme('colors.disabled-background') !important;
+    .n-button__state-border {
+      border: none !important;
+    }
+  }
+}
+
+@include themed('.n-button.n-button--tertiary-type .n-button__border', 'dark') {
+  border: 1px solid transparent !important;
+}
+
+.n-base-selection:not(.n-base-selection--disabled) .n-base-selection-label, .n-input:not(.n-input--disabled) {
+  background-color: theme('colors.input-background') !important;
+}
+
+.n-base-selection:not(.n-base-selection--disabled) .n-base-selection-placeholder, .n-input:not(.n-input--disabled) .n-input__placeholder {
+  color: theme('colors.card-text') !important;
+}
+
+@include themed('.n-card', 'light') {
+  box-shadow: theme('boxShadow.harder') !important;
+}
+
+.n-collapse-item__header--active .n-collapse-item__header-main {
+  font-weight: 500 !important;
+  color: theme('colors.main-brand') !important;
+}
+
+.n-base-selection.n-base-selection--disabled {
+  border: none !important;
+
+  * {
+    border: none !important;
+  }
+}
+
+$buttons: ('default': 'main-brand', 'primary': 'main-brand', 'info': 'info', 'success': 'success', 'warning': 'warning', 'error': 'danger');
+@each $t in ('light', 'dark') {
+  @each $btn, $n in $buttons {
+    [theme=#{$t}] .n-button.n-button--#{$btn}-type.n-button--dashed:active {
+      color: theme('colors.#{$n}-hover') !important;
+      background-color: theme('colors.translucent') !important;
+
+      .n-button__state-border {
+        border-width: 1px !important;
+      }
+    }
+  }
+}
+
+@include createTippyTheme('error', theme('colors.danger'), theme('colors.text'));
+
+span[class^="icon-"] {
+  position: relative;
+  left: 0.5px;
+  top: 1px;
+  width: 1.3em !important;
+  height: 1.3em !important;
+}
+
+[theme='light'] .icon-light {
+  color: theme('colors.text') !important;
+}
+
+[theme='dark'] .icon-dark {
+  color: theme('colors.text') !important;
+}
