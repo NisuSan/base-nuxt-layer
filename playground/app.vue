@@ -10,5 +10,5 @@
 </template>
 
 <script setup lang="ts">
-const a = tw`bg-slate-400`
+
 </script>
