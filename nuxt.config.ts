@@ -1,11 +1,9 @@
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
+import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
-
-const currentDir = dirname(fileURLToPath(import.meta.url))
-const localPath = (path: string) => join(currentDir, path)
+import IconsResolver from 'unplugin-icons/resolver'
+import { localPath } from './utils'
 
 export default defineNuxtConfig({
   build: {
@@ -21,7 +19,7 @@ export default defineNuxtConfig({
     ]
   },
   devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss", "nuxtjs-naive-ui"],
+  modules: ['@nuxtjs/tailwindcss', 'nuxtjs-naive-ui', 'unplugin-icons/nuxt'],
   vite: {
     optimizeDeps: {
       include: process.env.NODE_ENV === 'development' ? [
@@ -42,8 +40,9 @@ export default defineNuxtConfig({
         ]}]
       }),
       Components({
-        resolvers: [NaiveUiResolver()]
-      })
+        resolvers: [NaiveUiResolver(), IconsResolver()]
+      }),
+      Icons({ autoInstall: true })
     ]
   },
   tailwindcss: {
@@ -52,5 +51,6 @@ export default defineNuxtConfig({
       level: 4,
       alias: '#tw'
     }
-  }
+  },
+
 })

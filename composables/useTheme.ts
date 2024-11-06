@@ -1,40 +1,30 @@
 import type { GlobalThemeOverrides } from 'naive-ui'
-import { useColorMode, useDark, useToggle } from '@vueuse/core'
 import colors from '#tw/theme/colors'
+import { useColorMode, useDark, useToggle } from '@vueuse/core'
 
 type Options = {
-  themes: string[],
-  naiveUIStyles: GlobalThemeOverrides,
-  themesOrder: string[],
+  naiveUIStyles: GlobalThemeOverrides
 }
 
 export function useTheme(options?: Options) {
-  const { $appThemes } = useNuxtApp()
-
-  const defaultOptions = {
-    themes: $appThemes,
-    naiveUIStyles: {},
-    themesOrder: ['light', 'dark']
-  }
+  const defaultOptions = { naiveUIStyles: {} }
   options = Object.assign(options || {}, { ...defaultOptions, ...options })
 
-  if(options.themes.length != options.themesOrder.length) throw new Error('Theme order and theme names must be the same length')
-
+  const themes = useThemeNames()
   const isDark = useDark({ attribute: 'theme', valueDark: 'dark', valueLight: 'light' })
   const toggleTheme = useToggle(isDark)
 
-  const themeName = useColorMode({ attribute: 'theme', modes: Object.fromEntries($appThemes.map(n => [n, n])) })
+  const themeName = useColorMode({ attribute: 'theme', modes: Object.fromEntries(themes.map(n => [n, n])) })
   const nextThemeName = computed(() => isDark.value ? 'light' : 'dark')
 
-  const ch = (...args: string[]) => computed(() => args[options.themesOrder.indexOf(themeName.value)])
-  const setTheme = ((theme: typeof $appThemes[number]) => themeName.value = theme ) as { (theme: typeof $appThemes[number] | string): void }
+  const setTheme = ((theme: typeof themes[number]) => themeName.value = theme ) as { (theme: typeof themes[number] | string): void }
+  const themeUI = naiveUiOverrides(options.naiveUIStyles)
 
-  const themeUI = naiveUiOverrides(options.naiveUIStyles, ch)
-
-  return { toggleTheme, setTheme, ch, themeName, nextThemeName, themeUI }
+  return { toggleTheme, setTheme, themeName, nextThemeName, themeUI }
 }
 
-function naiveUiOverrides(customStyles: GlobalThemeOverrides, ch: (...args: string[]) => ComputedRef<string>) {
+function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
+  const ch = useColorChooser()
   const buttonColorMap = (prop: string) => [prop, colors['text']]
 
   const createPressedColors = () => {
