@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Icon: typeof import('@iconify/vue')['Icon']
+    IFa6RegularCircleStop: typeof import('~icons/fa6-regular/circle-stop')['default']
     NaiveUIWrapper: typeof import('@iconify/vue')['Icon']
     NButton: typeof import('naive-ui')['NButton']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
