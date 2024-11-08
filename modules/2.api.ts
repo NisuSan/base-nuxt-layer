@@ -5,7 +5,7 @@ import fg from 'fast-glob'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join, parse } from 'node:path'
 import { gray, greenBright } from 'ansis'
-import { localPath } from '../utils'
+import { localPath } from '../utils/index.server'
 
 export interface ModuleOptions {
   includeFiles?: string[],

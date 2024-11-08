@@ -1,7 +1,7 @@
 import { defineNuxtModule } from 'nuxt/kit'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { greenBright } from 'ansis'
-import { localPath } from '../utils'
+import { localPath } from '../utils/index.server'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ModuleOptions {}

@@ -3,7 +3,7 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import IconsResolver from 'unplugin-icons/resolver'
-import { localPath } from './utils'
+import { localPath } from './utils/index.server'
 
 export default defineNuxtConfig({
   build: {
@@ -52,5 +52,9 @@ export default defineNuxtConfig({
       alias: '#tw'
     }
   },
-
+  runtimeConfig: {
+    public: {
+      joiSetup: { locales: 'enEn', }
+    }
+  }
 })

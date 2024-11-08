@@ -1,4 +1,5 @@
 <template>
+  <!-- @vue-skip -->
   <n-config-provider :locale="props.locale" :date-locale="props.dateLocale" :theme-overrides="props.theme">
     <n-dialog-provider>
       <slot v-if="isLoaded"/>
