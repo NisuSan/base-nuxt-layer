@@ -12,6 +12,10 @@
   @return $string;
 }
 
+@function ch($light, $dark) {
+  @return if(var(--current-theme) == 'light', $light, $dark);
+}
+
 @mixin themed($selector: '', $theme: null) {
   $themes: (light, dark);
 
@@ -30,18 +34,6 @@
         @content;
       }
     }
-  }
-}
-
-@mixin light() {
-  [theme=light] & {
-    @content;
-  }
-}
-
-@mixin dark() {
-  [theme=dark] & {
-    @content;
   }
 }
 
@@ -70,7 +62,7 @@
 }
 
 // -------------------------------------
-// Css itself
+// SASS itself
 // -------------------------------------
 
 html {
@@ -104,7 +96,7 @@ html {
 }
 
 .n-base-selection:not(.n-base-selection--disabled) .n-base-selection-placeholder, .n-input:not(.n-input--disabled) .n-input__placeholder {
-  color: theme('colors.card-text') !important;
+  color: ch(theme('colors.placeholder'), #8b8b8b);
 }
 
 @include themed('.n-card', 'light') {
@@ -122,6 +114,23 @@ html {
   * {
     border: none !important;
   }
+}
+
+.n-input .n-input__input-el, .n-input .n-input__textarea-el {
+  caret-color: theme('colors.text');
+  color: ch(theme('colors.text'), theme('colors.card-text'));
+}
+
+.n-input .n-input__border, .n-input .n-input__state-border {
+  border: 1px solid theme('colors.border');
+}
+
+.n-input:not(.n-input--disabled).n-input--focus .n-input__state-border{
+  border: 1px solid theme('colors.main-brand');
+}
+
+.n-input:not(.n-input--disabled):hover .n-input__state-border {
+  border: 1px solid theme('colors.main-brand');
 }
 
 $buttons: ('default': 'main-brand', 'primary': 'main-brand', 'info': 'info', 'success': 'success', 'warning': 'warning', 'error': 'danger');

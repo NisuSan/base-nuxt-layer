@@ -20,6 +20,10 @@ export function useTheme(options?: Options) {
   const setTheme = ((theme: typeof themes[number]) => themeName.value = theme ) as { (theme: typeof themes[number] | string): void }
   const themeUI = naiveUiOverrides(options.naiveUIStyles)
 
+  /*this is for sass ch function*/
+  document.documentElement.style.setProperty('--current-theme', themeName.value)
+  watch(themeName, (n) => document.documentElement.style.setProperty('--current-theme', n))
+
   return { toggleTheme, setTheme, themeName, nextThemeName, themeUI }
 }
 
@@ -50,7 +54,7 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       errorColor: colors['danger'],
       errorColorHover: colors['danger-hover'],
       textColorBase: colors['text'],
-      placeholderColor: colors['placeholder'],
+      placeholderColor: ch('placeholder', 'placeholder-disabled'),
       placeholderColorDisabled: colors['placeholder-disabled'],
       textColorDisabled: colors['disabled-text'],
       inputColorDisabled: colors['disabled-background'],
@@ -90,6 +94,9 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       borderPressed: '1px solid ' + colors[`main-brand`],
       colorPressedError: colors[`danger-hover`],
       borderPressedError: colors[`danger-hover`],
+    },
+    Input: {
+      caretColor: colors['text'],
     },
     Card: {
       color: ch('transparent', 'card-background').value,
