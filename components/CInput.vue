@@ -11,7 +11,6 @@
 
 <script setup lang="ts">
   import { useRuntimeConfig } from 'nuxt/app'
-  import { onMounted, ref, watch, type Reactive } from 'vue'
   import { useTippy } from 'vue-tippy'
   import Joi from 'joi'
 
