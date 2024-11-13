@@ -17,22 +17,9 @@
 }
 
 @mixin themed($selector: '', $theme: null) {
-  $themes: (light, dark);
-
-  @if $theme == null {
-    @each $th in $themes {
-      @each $s in string.split($selector, ',') {
-        [theme=#{$th}] #{$s} {
-          @content;
-        }
-      }
-    }
-  }
-  @else {
-    @each $s in string.split($selector, ',') {
-      [theme=#{$theme}] #{$s} {
-        @content;
-      }
+  @each $s in string.split($selector, ',') {
+    [theme=#{$theme}] #{$s} {
+      @content;
     }
   }
 }
@@ -96,7 +83,7 @@ html {
 }
 
 .n-base-selection:not(.n-base-selection--disabled) .n-base-selection-placeholder, .n-input:not(.n-input--disabled) .n-input__placeholder {
-  color: ch(theme('colors.placeholder'), #8b8b8b);
+  color: theme('colors.placeholder');
 }
 
 @include themed('.n-card', 'light') {

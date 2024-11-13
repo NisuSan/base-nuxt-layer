@@ -1,5 +1,4 @@
 import type { Config } from 'tailwindcss'
-import { addDynamicIconSelectors } from '@iconify/tailwind'
 
 const defaultFonts= ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Helvetica Neue', 'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"']
 
@@ -58,9 +57,6 @@ export default <Partial<Config>> {
       pattern: /(bg|text)-(light|dark)-(.*)/,
       variants: ['hover']
     }
-  ],
-  plugins: [
-    addDynamicIconSelectors()
   ]
 }
 
