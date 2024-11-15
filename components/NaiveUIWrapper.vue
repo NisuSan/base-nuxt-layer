@@ -1,6 +1,5 @@
 <template>
-  <!-- @vue-skip -->
-  <n-config-provider :locale="props.locale" :date-locale="props.dateLocale" :theme-overrides="props.theme">
+  <n-config-provider :locale="locale" :date-locale="dateLocale" :theme-overrides="cTheme">
     <n-dialog-provider>
       <slot v-if="isLoaded"/>
       <div v-else class="h-screen w-full flex justify-center items-center">
@@ -11,28 +10,27 @@
 </template>
 
 <script setup lang="ts">
-  import { ukUA, type GlobalThemeOverrides } from 'naive-ui'
+  import { ukUA, dateUkUA, type GlobalThemeOverrides, type NLocale, type NDateLocale } from 'naive-ui'
 
   const props = withDefaults(defineProps<{
-    locale?: Record<string, unknown>
-    dateLocale?: Record<string, unknown>,
-    theme?: ComputedRef<GlobalThemeOverrides>,
+    locale?: NLocale
+    dateLocale?: NDateLocale,
+    theme?: GlobalThemeOverrides,
     srrLoadingBarColor?: string
   }>(), {
-    locale: () => ukUA,
-    dateLocale: () => ukUA,
-    theme: () => themeUI,
-    srrLoadingBarColor: '#6067B1'
+    srrLoadingBarColor: '#6067B1',
+    // @ts-ignore
+    locale: ukUA,
+    // @ts-ignore
+    dateLocale: dateUkUA
   })
 
   const isLoaded = ref(false)
+  const { themeUI } = useTheme()
+  const cTheme = computed(() => ({...themeUI, ...props.theme}))
+
   onMounted(() => { isLoaded.value = true })
 
-</script>
-
-<script lang="ts">
-  const { themeUI } = useTheme()
-  export default {}
 </script>
 
 <style lang="scss" scoped>
