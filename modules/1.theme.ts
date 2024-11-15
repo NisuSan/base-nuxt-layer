@@ -29,14 +29,14 @@ function getThemes() {
   const fileContent = readFileSync(localPath('../theme/theme.colors.css'), 'utf-8')
   if(!fileContent) throw new Error('No themes found')
 
-  return fileContent.matchAll(/\[theme=['"](\w+)['"]\]/gm).map((m) => m[1]).toArray()
+  return fileContent.matchAll(/\[theme=['"](\w+)['"]\]/gm).map((m) => m[1] ).toArray().filter(x => x) as string[]
 }
 
 function generateComposables() {
   const themes = getThemes()
   const themesArgs = Object.values(themes).map(t => `${t}:Layer.Color`).join()
   const themesLookUp = `{${Object.values(themes).join()},auto:dark}`
-  const possiblesOverrides
+  const possiblesOverrides = generateCombinations(themes, ['Layer.Color', 'string']).join()
 
   writeFileSync(localPath('../composables/__themes.ts'), `
     import { useColorMode } from '@vueuse/core'
@@ -45,26 +45,25 @@ function generateComposables() {
       return ${JSON.stringify(themes)}
     }
 
-    export function colors(name: Layer.Color) {
+    export function colors(name: string): string
+    export function colors(name: Layer.Color): string
+    export function colors(name: Layer.Color | string): string {
       return getComputedStyle(document.documentElement).getPropertyValue(name)
     }
 
     export function useColorChooser(){
       const th = useColorMode();
-      return (${themesArgs}) => computed(() => colors(${themesLookUp}[th.value]))
+      return ((${themesArgs}) => computed(() => colors(${themesLookUp}[th.value]))) as { ${possiblesOverrides} }
     };
   `)
 }
 
 function generateColorType() {
   const content = readFileSync(join(useNuxt().options.buildDir, 'types/tailwind.config.d.ts'), 'utf-8')
-
-  const moduleRegex = /(?<=declare module "#tw\/theme\/colors" \{)([\s\S]*?)(?=,\s+};\s?export default)/s
-  const moduleMatch = content.match(moduleRegex)
-
+  const moduleMatch = content.match(/(?<=declare module "#tw\/theme\/colors" \{)([\s\S]*?)(?=,\s+};\s?export default)/s)
   if (!moduleMatch) throw new Error('Module #tw/theme/colors not found in the provided .d.ts file')
-  const moduleContent = moduleMatch[1]
 
+  const moduleContent = moduleMatch[1]
   const colorMatches = [...(moduleContent?.matchAll(/export const (_\w+): (\{[^}]+\}|"[^"]+");/g) || [])]
   const colorVariants = new Set()
 
@@ -85,8 +84,30 @@ function generateColorType() {
 
   const project = new Project({ tsConfigFilePath: localPath('../tsconfig.json') })
   const sourceFile = project.getSourceFile(localPath('../types.d.ts'))
-  const layerNamespace = sourceFile?.getModule('global')?.getModule('Layer')
+  if (!sourceFile) throw new Error('types.d.ts file not found')
 
-  layerNamespace?.addTypeAlias({ name: 'Color', type: `'${[...colorVariants].join("' | '")}'`})
-  sourceFile?.saveSync()
+  const layerNamespace = sourceFile?.getModule('global')?.getModule('Layer')
+  if (!layerNamespace) throw new Error('Layer namespace not found in the provided .d.ts file')
+
+  layerNamespace.getTypeAlias('Color')?.remove()
+  layerNamespace.addTypeAlias({ name: 'Color', type: `'${[...colorVariants].join("' | '")}'`})
+  sourceFile.saveSync()
+}
+
+function generateCombinations(themes: string[], types: string[]): string[] {
+  const result: string[] = []
+  const combinationsCount = Math.pow(types.length, themes.length)
+
+  for (let i = 0; i < combinationsCount; i++) {
+    const combination: string[] = []
+    let remainder = i
+    for (let j = 0; j < themes.length; j++) {
+      const typeIndex = remainder % types.length
+      combination.push(`${themes[j]}: ${types[typeIndex]}`)
+      remainder = Math.floor(remainder / types.length)
+    }
+    result.push(`(${combination.join(', ')}): ComputedRef<string>`)
+  }
+
+  return result
 }
