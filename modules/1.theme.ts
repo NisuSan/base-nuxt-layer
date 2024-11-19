@@ -48,7 +48,9 @@ function generateComposables() {
     export function colors(name: string): string
     export function colors(name: Layer.Color): string
     export function colors(name: Layer.Color | string): string {
-      return getComputedStyle(document.documentElement).getPropertyValue(name)
+      const color = name.startsWith('#') || name.startsWith('rgb') ? name : getComputedStyle(document.documentElement).getPropertyValue(\`--\${name}\`)
+      if(!color) throw new Error(\`Color \${name} not found\`)
+      return color
     }
 
     export function useColorChooser(){

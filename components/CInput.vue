@@ -43,7 +43,7 @@
   const validationMessage = ref('')
   const isTouched = ref(false)
 
-  const formErrors = inject<Ref<{ el: HTMLElement, message: Ref<string> }[]>>('formErrors')
+  const formErrors = inject<Ref<{ el: HTMLElement, message: Ref<string> }[]>>('formErrors', ref([]))
 
   const value = defineModel<string | string[] | number | number[]>({
     set(n: string | string[] | number | number[]) {
@@ -79,7 +79,7 @@
       else {
         schema = props.validation
       }
-      if(props.required) schema = schema?.required()
+      schema = props.required ? schema?.required(): schema?.empty('')
 
       if(typeof props.validation !== 'object') {
         const joiSetup = useRuntimeConfig().public.joiSetup

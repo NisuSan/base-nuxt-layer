@@ -66,8 +66,7 @@ function generateComposables(options: ModuleOptions) {
     const group = parsed.dir.split('/').reverse()[0]
     const parts = parsed.name.split('.')
 
-    const n = parts[0] === 'index' ? 'data' : parts[0]
-    const fnName = parts[1] ? `${parts[1]}${capitalize(n || '')}` : n
+    const fnName = snakeToCamel(parts[0] || 'data')
     const route = getUrlRouteFromFile(x)
 
     return {
@@ -95,11 +94,11 @@ function generateComposables(options: ModuleOptions) {
     export type APIOutput<T> = ${compiledOutputTypes};
     export const defaults = ${compiledDefaults};
 
-    const dfBuilder = (n: string, d: unknown) => () => Array.isArray(defaults[n])
+    const dfBuilder = (n: string, d: unknown) => () => ref(Array.isArray(defaults[n])
       ? d || defaults[n]
       : typeof defaults[n] === 'object'
         ? { ...defaults[n], ...d }
-        : d || defaults[n]
+        : d || defaults[n])
 
     export function ${options.functionName}() {
       return {
@@ -201,4 +200,8 @@ function getUrlRouteFromFile(file: string) {
   const parsed = file.match(/\/server(.*?\/)([^/]+?)(?:\.\w+)+$/)!
   // @ts-expect-error some undefined error here
   return parsed[1] + (parsed[2] === 'index' ? '' : parsed[2])
+}
+
+function snakeToCamel(s: string) {
+  return s.replace(/(_\w)/g, k => (k[1] || '').toUpperCase())
 }
