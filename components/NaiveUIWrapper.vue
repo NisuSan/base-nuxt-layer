@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :locale="locale" :date-locale="dateLocale" :theme-overrides="cTheme">
+  <n-config-provider :locale="locale" :date-locale="dateLocale" :theme-overrides="themeUI">
     <n-dialog-provider>
       <slot v-if="isLoaded"/>
       <div v-else class="h-screen w-full flex justify-center items-center">
@@ -18,6 +18,7 @@
     theme?: GlobalThemeOverrides,
     srrLoadingBarColor?: string
   }>(), {
+    theme: () => ({}),
     srrLoadingBarColor: '#6067B1',
     // @ts-ignore
     locale: ukUA,
@@ -26,8 +27,7 @@
   })
 
   const isLoaded = ref(false)
-  const { themeUI } = useTheme()
-  const cTheme = computed(() => ({...themeUI, ...props.theme}))
+  const { themeUI } = useTheme({ naiveUIStyles: props.theme })
 
   onMounted(() => { isLoaded.value = true })
 

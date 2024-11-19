@@ -3,6 +3,7 @@ import {type Reactive} from 'vue'
 declare global {
   namespace Layer {
     type InputValidators = 'string' | 'string-cyrillic' | 'string-latin' | 'number' | 'number-positive'
+    type InputStatus = 'success' | 'warning' | 'error'
     type JoiLocales = 'ukUA' | 'enEn' | 'custom'
     type JoiMessages = { base: Record<string, string>, validators: Record<Partial<InputValidators>, Record<string, string>> }
     type JoiSetup = { locales: JoiLocales, messages: JoiMessages }

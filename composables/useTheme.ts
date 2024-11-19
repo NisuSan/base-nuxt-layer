@@ -125,7 +125,10 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
     Tabs: {
       tabFontWeightActive: '500',
       tabTextColorLine: colors('text'),
+      tabTextColorActiveLine: colors('main-brand'),
       tabTextColorBar: colors('text'),
+      tabTextColorActiveBar: colors('main-brand'),
+      barColor: colors('main-brand'),
     },
     Dialog: {
       titleFontSize: '1rem',
