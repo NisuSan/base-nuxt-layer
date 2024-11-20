@@ -49,7 +49,7 @@
   }
 
   async function closeTodo(id: number, done: boolean) {
-    const { data: todo } = await api().todo.close({ id, done })
+    await api().todo.close({ id, done })
   }
 </script>
 

@@ -1,9 +1,9 @@
-import { defineNuxtModule, useNuxt } from 'nuxt/kit'
+import { defineNuxtModule } from 'nuxt/kit'
 import { readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { greenBright } from 'ansis'
 import { localPath } from '../utils/index.server'
-import { Project } from 'ts-morph'
+import resolveConfig from 'tailwindcss/resolveConfig'
+import twconfig from '../tailwind.config'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ModuleOptions {}
@@ -19,7 +19,7 @@ export default defineNuxtModule<ModuleOptions>({
       console.log(`${greenBright('✔')} Generate __themes.ts composable`)
 
       generateColorType()
-      console.log(`${greenBright('✔')} Generate Color type to types.d.ts`)
+      console.log(`${greenBright('✔')} Generate Color type`)
     }
     catch (e) { console.error('themeUtils error:', e) }
   }
@@ -61,39 +61,12 @@ function generateComposables() {
 }
 
 function generateColorType() {
-  const content = readFileSync(join(useNuxt().options.buildDir, 'types/tailwind.config.d.ts'), 'utf-8')
-  const moduleMatch = content.match(/(?<=declare module "#tw\/theme\/colors" \{)([\s\S]*?)(?=,\s+};\s?export default)/s)
-  if (!moduleMatch) throw new Error('Module #tw/theme/colors not found in the provided .d.ts file')
+  // @ts-ignore
+  const colors = resolveConfig(twconfig).theme.textColor
+  if (!colors) throw new Error('Tailwind colors not found')
 
-  const moduleContent = moduleMatch[1]
-  const colorMatches = [...(moduleContent?.matchAll(/export const (_\w+): (\{[^}]+\}|"[^"]+");/g) || [])]
-  const colorVariants = new Set()
-
-  for (const match of colorMatches) {
-    const colorName = match[1]?.substring(1)
-    const colorValue = match[2]
-
-    if (colorValue?.startsWith('{')) Object.keys(JSON.parse(colorValue)).forEach(key => colorVariants.add(`${colorName}.${key}`));
-    else colorVariants.add(colorName)
-  }
-
-  const defaultExportMatch = moduleContent?.match(/const defaultExport: \{([^}]*)/g)
-  if (defaultExportMatch) {
-    for (const match of defaultExportMatch[0]?.matchAll(/"([\w-]+)":/g) || []) {
-      colorVariants.add(match[1])
-    }
-  }
-
-  const project = new Project({ tsConfigFilePath: localPath('../tsconfig.json') })
-  const sourceFile = project.getSourceFile(localPath('../types.d.ts'))
-  if (!sourceFile) throw new Error('types.d.ts file not found')
-
-  const layerNamespace = sourceFile?.getModule('global')?.getModule('Layer')
-  if (!layerNamespace) throw new Error('Layer namespace not found in the provided .d.ts file')
-
-  layerNamespace.getTypeAlias('Color')?.remove()
-  layerNamespace.addTypeAlias({ name: 'Color', type: `'${[...colorVariants].join("' | '")}'`})
-  sourceFile.saveSync()
+  const colorVariants = extractColorKeys(colors)
+  writeFileSync(localPath('../colors.d.ts'), `declare global { namespace Layer { type Color = '${[...colorVariants].join("' | '")}' } } export {}`)
 }
 
 function generateCombinations(themes: string[], types: string[]): string[] {
@@ -112,4 +85,11 @@ function generateCombinations(themes: string[], types: string[]): string[] {
   }
 
   return result
+}
+
+function extractColorKeys(obj: any, prefix = ''): string[] {
+  return Object.entries(obj).flatMap(([key, value]) => typeof value === 'string'
+    ? `${prefix}${key}`
+    : extractColorKeys(value, `${prefix}${key}.`)
+  )
 }

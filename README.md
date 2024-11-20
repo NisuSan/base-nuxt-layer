@@ -58,7 +58,7 @@ The API Generation Module simplifies API calls by generating composables from fi
  └── /api
       └── /auth
           └── login.get.ts
-          └── login.post.ts
+          └── signup.post.ts
 ```
 
 **Sample API File Content (login.post.ts):**
@@ -75,9 +75,9 @@ export default defineEventHandler(async (event) => {
 
 **Usage in Vue Component:**
 ```typescript
-const info = api().auth.postLogin({ login, password });
+const info = api().auth.login({ login, password });
 //or
-const info = api().auth.getLogin({ login, password });
+const info = api().auth.signup({ login, password });
 // info is of type AsyncData<{ name: string; role: string; privileges: number[] }, Error>
 ```
 
