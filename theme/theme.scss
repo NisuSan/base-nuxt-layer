@@ -78,6 +78,10 @@ html {
   border: 1px solid transparent !important;
 }
 
+.n-button.n-button--disabled {
+  color: ch(theme('colors.text'), #fff);
+}
+
 .n-base-selection:not(.n-base-selection--disabled) .n-base-selection-label, .n-input:not(.n-input--disabled) {
   background-color: theme('colors.input-background') !important;
 }

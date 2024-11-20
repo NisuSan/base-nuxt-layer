@@ -4,8 +4,8 @@
     <n-input v-bind="$attrs" ref="element" :class="{'autosized': props.autosize}" v-if="props.type === 'string' || props.type === 'number'" :autosize="props.autosize" v-model:value="/*@ts-ignore*/ value" type="text" :placeholder="props.placeholder" :disabled="props.disabled" :status="validationStatus" @focus="onFocus" @blur="onBlur"/>
     <n-checkbox v-bind="$attrs" v-else-if="props.type === 'checkbox'" v-model:checked="checked" :disabled="props.disabled">{{ props.title }}</n-checkbox>
     <n-select v-bind="$attrs" :class="{'select-autosize': props.autosize}" v-else-if="props.type === 'dropdown'" v-model:value="value" :options="options" :disabled="props.disabled" :multiple="props.multiple"/>
-    <n-date-picker v-bind="$attrs" :class="{'select-autosize': props.autosize}" v-else-if="props.type === 'date'" v-model:formatted-value="/*@ts-ignore*/ value" value-format="yyyy-MM-dd" format="dd.MM.yyyy" type="date" :disabled="props.disabled"/>
-    <n-date-picker v-bind="$attrs" :class="{'select-autosize': props.autosize}" v-else-if="props.type === 'datetime'" v-model:formatted-value="/*@ts-ignore*/ value" value-format="yyyy-MM-dd HH:mm:ss" format="dd.MM.yyyy HH:mm:ss" type="datetime" :disabled="props.disabled"/>
+    <n-date-picker v-bind="$attrs" :class="{'select-autosize': props.autosize}" v-else-if="props.type === 'date'" v-model:formatted-value="/*@ts-ignore*/ value" value-format="yyyy-MM-dd" format="dd.MM.yyyy" type="date" :disabled="props.disabled" :placeholder="props.placeholder" :update-value-on-close="true"/>
+    <n-date-picker v-bind="$attrs" :class="{'select-autosize': props.autosize}" v-else-if="props.type === 'datetime'" v-model:formatted-value="/*@ts-ignore*/ value" value-format="yyyy-MM-dd HH:mm:ss" format="dd.MM.yyyy HH:mm:ss" type="datetime" :disabled="props.disabled" :placeholder="props.placeholder" :update-value-on-close="true"/>
   </div>
 </template>
 

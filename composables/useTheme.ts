@@ -55,7 +55,6 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       textColorBase: colors('text'),
       placeholderColor: ch('placeholder', 'placeholder-disabled'),
       placeholderColorDisabled: colors('placeholder-disabled'),
-      textColorDisabled: colors('disabled-text'),
       inputColorDisabled: colors('disabled-background'),
       borderColor: colors('border'),
       dividerColor: colors('border'),
