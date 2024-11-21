@@ -53,26 +53,17 @@
 </template>
 
 <script setup lang="ts">
-  const activeTab = ref('todo')
   const newTodo = ref('')
   const newReminderText = ref('')
   const newReminderTime = ref()
-  const router = useRouter()
-  const route = useRoute()
 
-  const { data: todos, execute: executeTodos } = await api().todo.list({}, {  immediate: route.query.tab === 'todo' })
-  const { data: reminders, execute: executeReminders } = await api().reminder.list({}, { immediate: route.query.tab === 'reminder' })
+  const { activeTab, onTabChange, whenQuery } =  useControlTabs('todo', {
+    todo: async () => await executeTodos({ _initial: true }),
+    reminder: async () => await executeReminders({ _initial: true })
+  })
 
-  async function onTabChange(tab: string ) {
-    router.push({ query: { tab } })
-
-    switch (tab) {
-      case 'todo':
-        await executeTodos({ _initial: true }); break
-      case 'reminder':
-        await executeReminders({ _initial: true }); break
-    }
-  }
+  const { data: todos, execute: executeTodos } = await api().todo.list({}, {  immediate: whenQuery('todo') })
+  const { data: reminders, execute: executeReminders } = await api().reminder.list({}, { immediate: whenQuery('reminder') })
 
   async function addTodo() {
     if(!newTodo.value) useMessage().error('Please add a todo')
