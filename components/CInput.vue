@@ -23,7 +23,7 @@
     type?: 'string' | 'number' | 'checkbox' | 'dropdown' | 'date' | 'datetime',
     autosize?: boolean,
     disabled?: boolean,
-    validation?: Layer.InputValidators | Joi.Schema,
+    validation?: Layer.InputValidators | Joi.Schema | boolean,
     required?: boolean,
     multiple?: boolean,
     placeholder?: string,
@@ -58,7 +58,7 @@
   onMounted(() => { if(props.type === 'string' || props.type === 'number') {
     tippy = useTippy(element.value.inputElRef, { theme: 'error' })
 
-    if(props.validation) {
+    if(props.validation && props.validation !== true) {
       let schema: Joi.Schema | undefined = undefined
 
       if(props.validation === 'number') {

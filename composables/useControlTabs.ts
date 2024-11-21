@@ -12,9 +12,27 @@ export function useControlTabs(defaultTab: string, executableFunction: Record<st
     executableFunction[activeTab.value] && executableFunction[activeTab.value]?.()
   }
 
-  const whenQuery = (val: string) => route.query.tab === val
-  const whenParam = (val: string) => route.params.tab === val
-  const when = (type: 'query' | 'params', val: string) => route[type].tab === val
+  /**
+   * @function whenQuery - Check if the current tab is equal to the given tab in the query
+   * @param {string} val - The value to compare
+   * @returns {boolean} Whether the current tab is equal to the given tab
+   */
+  const whenQuery = (val: string): boolean => route.query.tab === val
+
+  /**
+   * @function whenParam - Check if the current tab is equal to the given tab in the route params
+   * @param {string} val - The value to compare
+   * @returns {boolean} Whether the current tab is equal to the given tab
+   */
+  const whenParam = (val: string): boolean => route.params.tab === val
+
+  /**
+   * @function when - Check if the current tab is equal to the given tab in either the query or params
+   * @param {string} type - The type of route to check, either 'query' or 'params'
+   * @param {string} val - The value to compare
+   * @returns {boolean} Whether the current tab is equal to the given tab
+   */
+  const when = (type: 'query' | 'params', val: string): boolean => route[type].tab === val
 
   return { activeTab, onTabChange, whenQuery, whenParam, when }
 }

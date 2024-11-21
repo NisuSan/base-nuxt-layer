@@ -4,7 +4,7 @@
       <n-tab-pane name="todo" tab="ToDo">
         <div style="width: fit-content;" class="flex flex-col">
           <div style="width: fit-content;">
-            <c-input class="mr-4" type="string" :required="false" placeholder="Add a new todo" v-model="newTodo" />
+            <c-input class="mr-4" type="string" :validation="false" :required="false" placeholder="Add a new todo" v-model="newTodo" />
             <n-button type="primary" class="mt-2" @click="addTodo()" :disabled="!newTodo">Add</n-button>
           </div>
 
@@ -27,7 +27,7 @@
       <n-tab-pane name="reminder" tab="Reminder">
         <div style="width: fit-content;" class="flex flex-col">
           <div style="width: fit-content;">
-            <c-input class="mr-4" type="string" :required="false" placeholder="Add a new reminder text" v-model="newReminderText" />
+            <c-input class="mr-4" type="string" :validation="false" :required="false" placeholder="Add a new reminder text" v-model="newReminderText" />
             <c-input class="mr-4" type="datetime" :required="true" placeholder="Add a new reminder time" v-model="newReminderTime" />
             <n-button type="primary" class="mt-2" @click="addReminder()" :disabled="!(newReminderText && newReminderTime)">Add</n-button>
           </div>
@@ -62,7 +62,7 @@
     reminder: async () => await executeReminders({ _initial: true })
   })
 
-  const { data: todos, execute: executeTodos } = await api().todo.list({}, {  immediate: whenQuery('todo') })
+  const { data: todos, execute: executeTodos } = await api().todo.list({}, { immediate: whenQuery('todo') })
   const { data: reminders, execute: executeReminders } = await api().reminder.list({}, { immediate: whenQuery('reminder') })
 
   async function addTodo() {
