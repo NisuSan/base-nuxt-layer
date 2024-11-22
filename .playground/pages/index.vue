@@ -5,16 +5,16 @@
         <div style="width: fit-content;" class="flex flex-col">
           <div style="width: fit-content;">
             <c-input class="mr-4" type="string" :validation="false" :required="false" placeholder="Add a new todo" v-model="newTodo" />
-            <n-button type="primary" class="mt-2" @click="addTodo()" :disabled="!newTodo">Add</n-button>
+            <n-button type="primary" class="todo-add mt-2" @click="addTodo()" :disabled="!newTodo">Add</n-button>
           </div>
 
-          <ul v-if="todos.length" class="pt-1">
+          <ul v-if="todos.length" class="todo-list pt-1">
             <li v-for="todo in todos" :key="todo.id" class="flex justify-between mt-2">
               <div>
                 <c-input type="checkbox" class="mr-3" v-model:checked="todo.done" @click="closeTodo(todo.id, todo.done)"/>
                 <span :class="{'line-through': todo.done}">{{ todo.task }}</span>
               </div>
-              <IFa6SolidTrash @click="removeTodo(todo.id)" class="cursor-pointer hover:text-danger-hover"/>
+              <IFa6SolidTrash @click="removeTodo(todo.id)" class="todo-remove cursor-pointer hover:text-danger-hover"/>
             </li>
           </ul>
           <n-empty v-else description="No todos here. Add one!" size="medium" class="inline-flex mt-4">
@@ -29,16 +29,16 @@
           <div style="width: fit-content;">
             <c-input class="mr-4" type="string" :validation="false" :required="false" placeholder="Add a new reminder text" v-model="newReminderText" />
             <c-input class="mr-4" type="datetime" :required="true" placeholder="Add a new reminder time" v-model="newReminderTime" />
-            <n-button type="primary" class="mt-2" @click="addReminder()" :disabled="!(newReminderText && newReminderTime)">Add</n-button>
+            <n-button type="primary" class="reminder-add mt-2" @click="addReminder()" :disabled="!(newReminderText && newReminderTime)">Add</n-button>
           </div>
 
-          <ul v-if="reminders.length" class="pt-1">
+          <ul v-if="reminders.length" class="reminder-list pt-1">
             <li v-for="rem in reminders" :key="rem.id" class="flex justify-between mt-2">
               <div>
                 <span>{{ rem.task }}</span>
                 <span class="ml-1">at <span class="font-bold">{{ rem.date.toLocaleString('uk-UA') }}</span></span>
               </div>
-              <IFa6SolidTrash @click="removeReminder(rem.id)" class="cursor-pointer hover:text-danger-hover"/>
+              <IFa6SolidTrash @click="removeReminder(rem.id)" class="reminder-remove cursor-pointer hover:text-danger-hover"/>
             </li>
           </ul>
           <n-empty v-else description="No reminders here. Add one!" size="medium" class="inline-flex mt-4">
