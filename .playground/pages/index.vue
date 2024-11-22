@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto mt-5">
+  <div class="container mx-auto mt-5 relative">
     <n-tabs type="line" animated default-value="todo" v-model:value="activeTab" @update:value="onTabChange">
       <n-tab-pane name="todo" tab="ToDo">
         <div style="width: fit-content;" class="flex flex-col">
@@ -49,6 +49,10 @@
         </div>
       </n-tab-pane>
     </n-tabs>
+    <div class="toggle-theme cursor-pointer p-2 border border-main-brand rounded inline-block absolute -top-1 right-2" @click="toggleTheme()">
+      <IFa6SolidSun v-if="themeName === 'dark'" width="1.1rem" height="1.1rem" class="toggle-theme-sun"/>
+      <IFa6SolidMoon v-else width="1.1rem" height="1.1rem" class="toggle-theme-moon"/>
+    </div>
   </div>
 </template>
 
@@ -56,6 +60,7 @@
   const newTodo = ref('')
   const newReminderText = ref('')
   const newReminderTime = ref()
+  const { themeName, toggleTheme } = useTheme()
 
   const { activeTab, onTabChange, whenQuery } =  useControlTabs('todo', {
     todo: async () => await executeTodos({ _initial: true }),
@@ -101,5 +106,28 @@
 </script>
 
 <style lang="scss">
+  [theme=dark] .toggle-theme {
+    svg {
+      color: theme('colors.yellow.500');
+    }
 
+    &:hover {
+      svg {
+        color: theme('colors.yellow.400');
+      }
+    }
+  }
+
+  [theme=light] .toggle-theme {
+    svg {
+      color: theme('colors.text');
+    }
+
+    &:hover {
+      background-color: theme('colors.main-brand');
+      svg {
+        color: white;
+      }
+    }
+  }
 </style>

@@ -124,6 +124,14 @@ html {
   border: 1px solid theme('colors.main-brand');
 }
 
+.n-tabs .n-tabs-tab {
+  color: theme('colors.text');
+}
+
+.n-tabs .n-tabs-nav.n-tabs-nav--line-type.n-tabs-nav--top .n-tabs-nav-scroll-content {
+  border-bottom: 1px solid theme('colors.border');
+}
+
 $buttons: ('default': 'main-brand', 'primary': 'main-brand', 'info': 'info', 'success': 'success', 'warning': 'warning', 'error': 'danger');
 @each $t in ('light', 'dark') {
   @each $btn, $n in $buttons {

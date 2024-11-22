@@ -8,6 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     IFa6SolidList: typeof import('~icons/fa6-solid/list')['default']
+    IFa6SolidMoon: typeof import('~icons/fa6-solid/moon')['default']
+    IFa6SolidSun: typeof import('~icons/fa6-solid/sun')['default']
     IFa6SolidTrash: typeof import('~icons/fa6-solid/trash')['default']
     NButton: typeof import('naive-ui')['NButton']
     NCheckbox: typeof import('naive-ui')['NCheckbox']

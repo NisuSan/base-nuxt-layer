@@ -97,7 +97,7 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       caretColor: colors('text'),
     },
     Card: {
-      color: ch('transparent', 'card-background').value,
+      color: ch('rgba(255, 255, 255, 0)', 'card-background').value,
       borderColor: 'none',
       paddingMedium: '10px',
       borderRadius: '5px',
@@ -125,7 +125,6 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       tabFontWeightActive: '500',
       tabTextColorLine: colors('text'),
       tabTextColorActiveLine: colors('main-brand'),
-      tabTextColorBar: colors('text'),
       tabTextColorActiveBar: colors('main-brand'),
       barColor: colors('main-brand'),
     },

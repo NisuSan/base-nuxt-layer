@@ -49,7 +49,7 @@ describe('Test ToDo tab', () => {
     cy.request('GET', '/api/todo/list').then((res) => {
       expect(res.status).to.eq(200)
       if(res.body.length === 0) {
-        emptyVisibility('todos')
+        emptyVisibility('todo')
       }
     })
   })
@@ -96,12 +96,12 @@ describe('Test ToDo tab', () => {
 
     cy.intercept('DELETE', '/api/todo/remove', (request) => {
       expect(request.body).to.be.true
-      emptyVisibility('todos')
+      emptyVisibility('todo')
     })
   })
 })
 
-describe.only('Test Reminder tab', () => {
+describe('Test Reminder tab', () => {
   before(() => cy.task('deleteFile', './.playground/server/db/reminder.json'))
   beforeEach(() => cy.visit('/?tab=reminder'))
 
@@ -118,7 +118,7 @@ describe.only('Test Reminder tab', () => {
     })
   })
 
-  it.only('Add new Reminder', () => {
+  it('Add new Reminder', () => {
     fillInputPanel('test remind')
     cy.get('.reminder-add').click()
 
@@ -144,16 +144,29 @@ describe.only('Test Reminder tab', () => {
   })
 })
 
+describe.only('Test color mode change', () => {
+  for (const th of [{name: 'dark', i: 'sun'}, {name: 'light', i: 'moon'}]) {
+    it(`Change color mode to ${th.name}`, () => {
+      cy.visit('/?tab=todo')
+      cy.window().then((win) => win.localStorage.setItem('vueuse-color-scheme', th.name === 'dark' ? 'light' : 'dark'))
+
+      cy.get('.toggle-theme').click()
+      cy.get('[theme]').should('have.attr', 'theme', th.name)
+      cy.get(`.toggle-theme-${th.i}`).should('be.visible')
+    })
+  }
+})
+
 function inputPanel(tab: 'todo' | 'reminder') {
   cy.get('.c-input').should('be.visible').should('have.length', tab === 'todo' ? 1 : 2)
-  cy.get(tab === 'todo' ? '.todo-add' : '.reminder-add').should('be.visible')
+  cy.get('.n-button').should('be.visible')
 }
 
 function inputPanelActivity(text: string, state: 'enabled' | 'disabled') {
   if(text === '') cy.get('.c-input').should('have.value', text)
 
   fillInputPanel(text)
-  cy.get(!text.includes('remind') ? '.todo-add' : '.reminder-add').should(`be.${state}`)
+  cy.get('.n-button').should(`be.${state}`)
 }
 
 function fillInputPanel(text: string) {
@@ -166,8 +179,8 @@ function fillInputPanel(text: string) {
   }
 }
 
-function emptyVisibility(text: 'todos' | 'reminder') {
+function emptyVisibility(text: 'todo' | 'reminder') {
   cy.get('.n-empty').should('be.visible')
   cy.get('.n-empty__icon').should('be.visible')
-  cy.get('.n-empty__description').should('have.text', `No ${text} here. Add one!`)
+  cy.get('.n-empty__description').should('have.text', `No ${text}s here. Add one!`)
 }
