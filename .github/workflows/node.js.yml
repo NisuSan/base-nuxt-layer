@@ -21,3 +21,11 @@ jobs:
         cache: 'pnpm'
     - run: pnpm i
     - run: pnpm run build
+    - run: node .playground/.output/server/index.mjs
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: cypress-io/github-action@v6
+      with:
+          start: pnpm module:start
