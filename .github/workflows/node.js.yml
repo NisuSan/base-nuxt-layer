@@ -24,6 +24,7 @@ jobs:
     - run: node .playground/.output/server/index.mjs
   test:
     runs-on: ubuntu-latest
+    needs: build
     steps:
     - uses: actions/checkout@v4
     - uses: cypress-io/github-action@v6
