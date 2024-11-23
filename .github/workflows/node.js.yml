@@ -50,5 +50,3 @@ jobs:
 
     - name: Test layer with Cypress
       uses: cypress-io/github-action@v6
-      with:
-        start: false
