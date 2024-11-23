@@ -1,4 +1,4 @@
-name: Base Nuxt Module CI
+name: Base Nuxt Layer CI
 
 on:
   push:
@@ -27,10 +27,20 @@ jobs:
     - name: Install dependencies
       run: pnpm i
 
-    - name: Build module
+    - name: Build layer
       run: pnpm run build
 
-    - name: Test module with Cypress
+    - name: Cache Cypress
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/Cypress
+        key: ${{ runner.os }}-cypress-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: ${{ runner.os }}-cypress-
+
+    - name: Install Cypress
+      run: pnpm cypress install
+
+    - name: Test layer with Cypress
       uses: cypress-io/github-action@v6
       with:
         build: pnpm module:start
