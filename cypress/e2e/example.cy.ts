@@ -144,7 +144,7 @@ describe('Test Reminder tab', () => {
   })
 })
 
-describe.only('Test color mode change', () => {
+describe('Test color mode change', () => {
   for (const th of [{name: 'dark', i: 'sun'}, {name: 'light', i: 'moon'}]) {
     it(`Change color mode to ${th.name}`, () => {
       cy.visit('/?tab=todo')
