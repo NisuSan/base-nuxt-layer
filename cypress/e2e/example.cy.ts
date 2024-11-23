@@ -38,7 +38,9 @@ describe('Test general tabs functionalities', () => {
 })
 
 describe('Test ToDo tab', () => {
-  before(() => cy.task('deleteFile', './.playground/server/db/todo.json'))
+  if(process.env.NODE_ENV === 'development')
+    before(() => cy.task('deleteFile', './.playground/server/db/todo.json'))
+
   beforeEach(() => cy.visit('/?tab=todo'))
 
   it('ToDo tab has input and button', () => inputPanel('todo'))
@@ -102,7 +104,9 @@ describe('Test ToDo tab', () => {
 })
 
 describe('Test Reminder tab', () => {
-  before(() => cy.task('deleteFile', './.playground/server/db/reminder.json'))
+  if(process.env.NODE_ENV === 'development')
+    before(() => cy.task('deleteFile', './.playground/server/db/reminder.json'))
+
   beforeEach(() => cy.visit('/?tab=reminder'))
 
   it('Reminder tab has input and button', () => inputPanel('reminder'))

@@ -34,7 +34,7 @@ jobs:
 
     # Cache Cypress binary
     - name: Cache Cypress Binary
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/Cypress
         key: ${{ runner.os }}-cypress-${{ hashFiles('**/pnpm-lock.yaml') }}
