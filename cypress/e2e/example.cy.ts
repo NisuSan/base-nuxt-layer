@@ -38,7 +38,7 @@ describe('Test general tabs functionalities', () => {
 })
 
 describe('Test ToDo tab', () => {
-  if(process.env.NODE_ENV === 'development')
+  if(!process.env.RUN_ON_CI)
     before(() => cy.task('deleteFile', './.playground/server/db/todo.json'))
 
   beforeEach(() => cy.visit('/?tab=todo'))
@@ -104,7 +104,7 @@ describe('Test ToDo tab', () => {
 })
 
 describe('Test Reminder tab', () => {
-  if(process.env.NODE_ENV === 'development')
+  if(!process.env.RUN_ON_CI)
     before(() => cy.task('deleteFile', './.playground/server/db/reminder.json'))
 
   beforeEach(() => cy.visit('/?tab=reminder'))
