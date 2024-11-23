@@ -1,4 +1,4 @@
-console.log('NODE_ENV', process.env.NODE_ENV && process.env.NODE_ENV !== 'ci');
+cy.log('NODE_ENV', process.env.NODE_ENV && process.env.NODE_ENV !== 'ci');
 
 describe('Test general tabs functionalities', () => {
   const tabs = [
