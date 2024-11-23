@@ -14,9 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Checkout and install
+    - name: Checkout
       uses: actions/checkout@v4
+
+    -name : Install pnpm
       uses: pnpm/action-setup@4
+
+    - name: Setup node
       uses: actions/setup-node@v4
       with:
         node-version: 22.x
@@ -24,10 +28,10 @@ jobs:
         cache-dependency-path: pnpm-lock.yaml
       run: pnpm i
 
-    - name: Build
+    - name: Build module
       run: pnpm run build
 
-    - name: Cypress run
+    - name: Test module with Cypress
       uses: cypress-io/github-action@v6
       with:
         start: pnpm module:start
