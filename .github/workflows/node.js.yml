@@ -26,6 +26,8 @@ jobs:
         node-version: 22.x
         cache: 'pnpm'
         cache-dependency-path: pnpm-lock.yaml
+
+    - name: Install dependencies
       run: pnpm i
 
     - name: Build module
