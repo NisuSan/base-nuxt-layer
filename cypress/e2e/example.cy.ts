@@ -38,6 +38,8 @@ describe('Test general tabs functionalities', () => {
 })
 
 describe('Test ToDo tab', () => {
+  console.log(process.env.NODE_ENV, process.env.NODE_ENV !== 'ci');
+
   if(process.env.NODE_ENV !== 'ci')
     before(() => cy.task('deleteFile', './.playground/server/db/todo.json'))
 
