@@ -1,4 +1,4 @@
-name: Base Nuxt Layer CI
+name: E2E Tests
 
 on:
   push:
@@ -40,7 +40,15 @@ jobs:
     - name: Install Cypress
       run: pnpm cypress install
 
+    - name: Start Server
+      run: pnpm module:start &
+      env:
+        NODE_ENV: development
+
+    - name: Wait for Server to be Ready
+      run: npx wait-on http://localhost:3000
+
     - name: Test layer with Cypress
       uses: cypress-io/github-action@v6
       with:
-        build: pnpm module:start
+        start: false
