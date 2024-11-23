@@ -59,4 +59,4 @@ jobs:
     - name: Run Cypress Tests
       uses: cypress-io/github-action@v6
       env:
-        NODE_ENV: ci
+        CYPRESS_NODE_ENV: ci
