@@ -50,6 +50,7 @@ jobs:
       run: pnpm module:start &
       env:
         NODE_ENV: development
+        RUN_ON_CI: github
 
     # Wait for the server to be ready
     - name: Wait for Server to Start
