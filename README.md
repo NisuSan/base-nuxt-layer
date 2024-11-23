@@ -1,4 +1,5 @@
 # Base Nuxt Layer
+[![E2E Tests](https://github.com/NisuSan/base-nuxt-layer/actions/workflows/node.js.yml/badge.svg)](https://github.com/NisuSan/base-nuxt-layer/actions/workflows/node.js.yml)
 
 This Nuxt Layer enhances development efficiency with structured modules, custom components, shared utilities, and themes. The setup includes an API generation module, a comprehensive theme system, an icons engine, and custom form components to streamline your project.
 

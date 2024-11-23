@@ -47,7 +47,7 @@ jobs:
 
     # Start the server
     - name: Start Server
-      run: pnpm module:start &
+      run: pnpm start &
       env:
         NODE_ENV: devel
 
