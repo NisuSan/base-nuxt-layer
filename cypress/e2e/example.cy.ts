@@ -1,5 +1,3 @@
-cy.log('NODE_ENV', process.env.NODE_ENV && process.env.NODE_ENV !== 'ci');
-
 describe('Test general tabs functionalities', () => {
   const tabs = [
     { tab: 'todo', name: 'ToDo' },
@@ -7,6 +5,7 @@ describe('Test general tabs functionalities', () => {
   ]
 
   it('Has tabs ToDo and Reminder', () => {
+    cy.log('NODE_ENV', process.env.NODE_ENV && process.env.NODE_ENV !== 'ci');
     cy.visit('/')
 
     cy.get('.n-tabs').should('be.visible')
