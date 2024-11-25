@@ -5,8 +5,8 @@
 </template>
 
 <script setup lang="ts">
-  const formErrors = ref<{ el: HTMLElement, message: Ref<string> }[]>([])
-  const status = computed<Layer.InputStatus>(() => formErrors.value.some(d => d.message) ? 'error' : 'success')
+const formErrors = ref<{ el: HTMLElement; message: Ref<string> }[]>([])
+const status = computed<Layer.InputStatus>(() => (formErrors.value.some(d => d.message) ? 'error' : 'success'))
 
-  provide('formErrors', formErrors)
+provide('formErrors', formErrors)
 </script>

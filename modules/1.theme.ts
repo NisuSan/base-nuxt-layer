@@ -5,8 +5,7 @@ import { localPath } from '../utils/index.server'
 import resolveConfig from 'tailwindcss/resolveConfig'
 import twconfig from '../tailwind.config'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface ModuleOptions {}
+export type ModuleOptions = Record<string, unknown>
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
@@ -20,25 +19,34 @@ export default defineNuxtModule<ModuleOptions>({
 
       generateColorType()
       console.log(`${greenBright('✔')} Generate Color type`)
+    } catch (e) {
+      console.error('themeUtils error:', e)
     }
-    catch (e) { console.error('themeUtils error:', e) }
-  }
+  },
 })
 
 function getThemes() {
   const fileContent = readFileSync(localPath('../theme/theme.colors.css'), 'utf-8')
-  if(!fileContent) throw new Error('No themes found')
+  if (!fileContent) throw new Error('No themes found')
 
-  return fileContent.matchAll(/\[theme=['"](\w+)['"]\]/gm).map((m) => m[1] ).toArray().filter(x => x) as string[]
+  return fileContent
+    .matchAll(/\[theme=['"](\w+)['"]\]/gm)
+    .map(m => m[1])
+    .toArray()
+    .filter(x => x) as string[]
 }
 
 function generateComposables() {
   const themes = getThemes()
-  const themesArgs = Object.values(themes).map(t => `${t}:Layer.Color`).join()
+  const themesArgs = Object.values(themes)
+    .map(t => `${t}:Layer.Color`)
+    .join()
   const themesLookUp = `{${Object.values(themes).join()},auto:dark}`
   const possiblesOverrides = generateCombinations(themes, ['Layer.Color', 'string']).join()
 
-  writeFileSync(localPath('../composables/__themes.ts'), `
+  writeFileSync(
+    localPath('../composables/__themes.ts'),
+    `
     import { useColorMode } from '@vueuse/core'
 
     export function useThemeNames(){
@@ -57,7 +65,8 @@ function generateComposables() {
       const th = useColorMode();
       return ((${themesArgs}) => computed(() => colors(${themesLookUp}[th.value]))) as { ${possiblesOverrides} }
     };
-  `)
+  `
+  )
 }
 
 function generateColorType() {
@@ -66,12 +75,15 @@ function generateColorType() {
   if (!colors) throw new Error('Tailwind colors not found')
 
   const colorVariants = extractColorKeys(colors)
-  writeFileSync(localPath('../colors.d.ts'), `declare global { namespace Layer { type Color = '${[...colorVariants].join("' | '")}' } } export {}`)
+  writeFileSync(
+    localPath('../colors.d.ts'),
+    `declare global { namespace Layer { type Color = '${[...colorVariants].join("' | '")}' } } export {}`
+  )
 }
 
 function generateCombinations(themes: string[], types: string[]): string[] {
   const result: string[] = []
-  const combinationsCount = Math.pow(types.length, themes.length)
+  const combinationsCount = types.length ** themes.length
 
   for (let i = 0; i < combinationsCount; i++) {
     const combination: string[] = []
@@ -87,9 +99,9 @@ function generateCombinations(themes: string[], types: string[]): string[] {
   return result
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: I don't know how fix this yet
 function extractColorKeys(obj: any, prefix = ''): string[] {
-  return Object.entries(obj).flatMap(([key, value]) => typeof value === 'string'
-    ? `${prefix}${key}`
-    : extractColorKeys(value, `${prefix}${key}.`)
+  return Object.entries(obj).flatMap(([key, value]) =>
+    typeof value === 'string' ? `${prefix}${key}` : extractColorKeys(value, `${prefix}${key}.`)
   )
 }

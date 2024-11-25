@@ -9,52 +9,47 @@ export default defineNuxtConfig({
   build: {
     transpile: [
       '@juggle/resize-observer',
-      ...(process.env.NODE_ENV === 'production' ? [
-        'naive-ui',
-        'vueuc',
-        '@css-render/vue3-ssr',
-        '@hapi',
-        '@sideway'
-      ] : [])
-    ]
+      ...(process.env.NODE_ENV === 'production'
+        ? ['naive-ui', 'vueuc', '@css-render/vue3-ssr', '@hapi', '@sideway']
+        : []),
+    ],
   },
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', 'nuxtjs-naive-ui', 'unplugin-icons/nuxt'],
   vite: {
     optimizeDeps: {
-      include: process.env.NODE_ENV === 'development' ? [
-        localPath('./node_modules/naive-ui'),
-        localPath('./node_modules/vueuc')
-      ] : [],
+      include:
+        process.env.NODE_ENV === 'development'
+          ? [localPath('./node_modules/naive-ui'), localPath('./node_modules/vueuc')]
+          : [],
     },
     ssr: {
-      noExternal: ['naive-ui']
+      noExternal: ['naive-ui'],
     },
     plugins: [
-      AutoImport({ imports: [{
-        'naive-ui': [
-          'useDialog',
-          'useMessage',
-          'useNotification',
-          'useLoadingBar'
-        ]}]
+      AutoImport({
+        imports: [
+          {
+            'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
+          },
+        ],
       }),
       Components({
-        resolvers: [NaiveUiResolver(), IconsResolver()]
+        resolvers: [NaiveUiResolver(), IconsResolver()],
       }),
-      Icons({ autoInstall: true })
-    ]
+      Icons({ autoInstall: true }),
+    ],
   },
   tailwindcss: {
     cssPath: ['./assets/tailwind.css', { injectPosition: 'first' }],
     exposeConfig: {
       level: 4,
-      alias: '#tw'
-    }
+      alias: '#tw',
+    },
   },
   runtimeConfig: {
     public: {
-      joiSetup: { locales: 'enEn', }
-    }
-  }
+      joiSetup: { locales: 'enEn' },
+    },
+  },
 })

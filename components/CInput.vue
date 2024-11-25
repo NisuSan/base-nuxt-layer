@@ -10,84 +10,86 @@
 </template>
 
 <script setup lang="ts">
-  import { useRuntimeConfig } from 'nuxt/app'
-  import { useTippy } from 'vue-tippy'
-  import Joi from 'joi'
+import { useRuntimeConfig } from 'nuxt/app'
+import { useTippy } from 'vue-tippy'
+import Joi from 'joi'
 
-  defineOptions({
-    inheritAttrs: false
-  })
+defineOptions({
+  inheritAttrs: false,
+})
 
-  const props = withDefaults(defineProps<{
-    title?: string,
-    type?: 'string' | 'number' | 'checkbox' | 'dropdown' | 'date' | 'datetime',
-    autosize?: boolean,
-    disabled?: boolean,
-    validation?: Layer.InputValidators | Joi.Schema | boolean,
-    required?: boolean,
-    multiple?: boolean,
-    placeholder?: string,
-    size?: 'small' | 'medium' | 'large',
+const props = withDefaults(
+  defineProps<{
+    title?: string
+    type?: 'string' | 'number' | 'checkbox' | 'dropdown' | 'date' | 'datetime'
+    autosize?: boolean
+    disabled?: boolean
+    validation?: Layer.InputValidators | Joi.Schema | boolean
+    required?: boolean
+    multiple?: boolean
+    placeholder?: string
+    size?: 'small' | 'medium' | 'large'
     display?: 'block' | 'inline-block'
-  }>(), {
+  }>(),
+  {
     type: 'string',
     validation: 'string',
     autosize: true,
     required: true,
     size: 'medium',
     display: 'inline-block',
-  })
+  }
+)
 
-  const element = ref()
-  const validationStatus = ref<Layer.InputStatus>('success')
-  const validationMessage = ref('')
-  const isTouched = ref(false)
+const element = ref()
+const validationStatus = ref<Layer.InputStatus>('success')
+const validationMessage = ref('')
+const isTouched = ref(false)
 
-  const formErrors = inject<Ref<{ el: HTMLElement, message: Ref<string> }[]>>('formErrors', ref([]))
+const formErrors = inject<Ref<{ el: HTMLElement; message: Ref<string> }[]>>('formErrors', ref([]))
 
-  const value = defineModel<string | string[] | number | number[]>({
-    set(n: string | string[] | number | number[]) {
-      return props.type === 'number' && !Number.isNaN(Number(n)) && n !== '' && n !== '-' ? Number(n) : n
-    }
-  })
-  const checked = defineModel<boolean>('checked')
-  const options = defineModel<{ label: string, value: string | number, disabled?: boolean }[]>('options')
+const value = defineModel<string | string[] | number | number[]>({
+  set(n: string | string[] | number | number[]) {
+    return props.type === 'number' && !Number.isNaN(Number(n)) && n !== '' && n !== '-' ? Number(n) : n
+  },
+})
+const checked = defineModel<boolean>('checked')
+const options = defineModel<{ label: string; value: string | number; disabled?: boolean }[]>('options')
 
-  let tippy: any = undefined
+// biome-ignore lint/suspicious/noExplicitAny: tippy doesn't has separated type
+let tippy: any = undefined
 
-  onMounted(() => { if(props.type === 'string' || props.type === 'number') {
+onMounted(() => {
+  if (props.type === 'string' || props.type === 'number') {
     tippy = useTippy(element.value.inputElRef, { theme: 'error' })
 
-    if(props.validation && props.validation !== true) {
+    if (props.validation && props.validation !== true) {
       let schema: Joi.Schema | undefined = undefined
 
-      if(props.validation === 'number') {
+      if (props.validation === 'number') {
         schema = Joi.number()
-      }
-      else if(props.validation === 'number-positive') {
+      } else if (props.validation === 'number-positive') {
         schema = Joi.number().positive()
-      }
-      else if (props.validation === 'string') {
+      } else if (props.validation === 'string') {
         schema = Joi.string().regex(/^[A-Za-z\u0400-\u04FF\s'"]+$/)
-      }
-      else if (props.validation === 'string-cyrillic') {
+      } else if (props.validation === 'string-cyrillic') {
         schema = Joi.string().regex(/^[\u0400-\u04FF\s'"]+$/)
-      }
-      else if (props.validation === 'string-latin') {
+      } else if (props.validation === 'string-latin') {
         schema = Joi.string().regex(/^[A-Za-z]+$/)
-      }
-      else {
+      } else {
         schema = props.validation
       }
-      schema = props.required ? schema?.required(): schema?.empty('')
+      schema = props.required ? schema?.required() : schema?.empty('')
 
-      if(typeof props.validation !== 'object') {
+      if (typeof props.validation !== 'object') {
         const joiSetup = useRuntimeConfig().public.joiSetup
-        if(joiSetup.locales === 'custom' && Object.keys(joiSetup.messages).length > 0) throw new Error('Custom messages for Joi is not defined')
+        if (joiSetup.locales === 'custom' && Object.keys(joiSetup.messages).length > 0)
+          throw new Error('Custom messages for Joi is not defined')
 
-        schema = schema.messages(joiSetup.locales === 'custom'
-          ? { ...joiSetup.messages.base, ...joiSetup.messages.validators[props.validation] }
-          : getJoiMessagesByLocale(joiSetup.locales, props.validation)
+        schema = schema.messages(
+          joiSetup.locales === 'custom'
+            ? { ...joiSetup.messages.base, ...joiSetup.messages.validators[props.validation] }
+            : getJoiMessagesByLocale(joiSetup.locales, props.validation)
         )
       }
 
@@ -103,10 +105,16 @@
 
       formErrors?.value.push({ el: element.value.inputElRef, message: validationMessage })
     }
-  }})
+  }
+})
 
-  const onFocus = () => isTouched.value = true
-  const onBlur = () => isTouched.value = false
+const onFocus = () => {
+  isTouched.value = true
+}
+
+const onBlur = () => {
+  isTouched.value = false
+}
 </script>
 
 <style lang="scss">

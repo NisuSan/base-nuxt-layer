@@ -1,6 +1,4 @@
-import { NTabs } from 'naive-ui'
-
-export function useControlTabs(defaultTab: string, executableFunction: Record<string, Function> = {}) {
+export function useControlTabs(defaultTab: string, executableFunction: Record<string, () => void> = {}) {
   const activeTab = ref('')
   const router = useRouter()
   const route = useRoute()

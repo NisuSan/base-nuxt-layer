@@ -7,21 +7,23 @@ type Options = {
 
 export function useTheme(options?: Options) {
   const defaultOptions = { naiveUIStyles: {} }
-  options = Object.assign(options || {}, { ...defaultOptions, ...options })
+  Object.assign(options || {}, { ...defaultOptions, ...options })
 
   const themes = useThemeNames()
   const isDark = useDark({ attribute: 'theme', valueDark: 'dark', valueLight: 'light' })
   const toggleTheme = useToggle(isDark)
 
   const themeName = useColorMode({ attribute: 'theme', modes: Object.fromEntries(themes.map(n => [n, n])) })
-  const nextThemeName = computed(() => isDark.value ? 'light' : 'dark')
+  const nextThemeName = computed(() => (isDark.value ? 'light' : 'dark'))
 
-  const setTheme = ((theme: typeof themes[number]) => themeName.value = theme ) as { (theme: typeof themes[number] | string): void }
-  const themeUI = naiveUiOverrides(options.naiveUIStyles)
+  const setTheme = ((theme: (typeof themes)[number]) => {
+    themeName.value = theme
+  }) as (theme: (typeof themes)[number] | string) => void
+  const themeUI = naiveUiOverrides(options?.naiveUIStyles || {})
 
   /*this is for sass ch function*/
   document.documentElement.style.setProperty('--current-theme', themeName.value)
-  watch(themeName, (n) => document.documentElement.style.setProperty('--current-theme', n))
+  watch(themeName, n => document.documentElement.style.setProperty('--current-theme', n))
 
   return { toggleTheme, setTheme, themeName, nextThemeName, themeUI }
 }
@@ -32,7 +34,11 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
 
   const createPressedColors = () => {
     const kind = ['Primary', 'Info', 'Success', 'Warning'] as const
-    return Object.fromEntries(['color', 'border'].map(p => kind.map(k => [`${p}Pressed${k}`, colors(`${k === 'Primary' ? 'main-brand' : k.toLowerCase()}-hover`)])).flat())
+    return Object.fromEntries(
+      ['color', 'border'].flatMap(p =>
+        kind.map(k => [`${p}Pressed${k}`, colors(`${k === 'Primary' ? 'main-brand' : k.toLowerCase()}-hover`)])
+      )
+    )
   }
 
   // @ts-ignore
@@ -76,8 +82,20 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       scrollbarColorThumb: colors('border'),
     },
     Button: {
-      ...Object.fromEntries(['textColorPrimary', 'textColorInfo', 'textColorSuccess', 'textColorWarning', 'textColorError'].map(buttonColorMap)),
-      ...Object.fromEntries(['textColorHoverPrimary', 'textColorHoverInfo', 'textColorHoverSuccess', 'textColorHoverWarning', 'textColorHoverError'].map(buttonColorMap)),
+      ...Object.fromEntries(
+        ['textColorPrimary', 'textColorInfo', 'textColorSuccess', 'textColorWarning', 'textColorError'].map(
+          buttonColorMap
+        )
+      ),
+      ...Object.fromEntries(
+        [
+          'textColorHoverPrimary',
+          'textColorHoverInfo',
+          'textColorHoverSuccess',
+          'textColorHoverWarning',
+          'textColorHoverError',
+        ].map(buttonColorMap)
+      ),
       color: ch('background', 'card-background').value,
       colorHover: ch('background', 'card-background').value,
       textColor: ch('text', 'card-text').value,
@@ -87,9 +105,9 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       textColorTertiaryHover: ch('main-brand', 'dark-accent').value,
       textColorPressed: ch('main-brand', 'light-accent').value,
       colorPressed: colors('translucent'),
-      border: '1px solid ' + colors('border'),
+      border: `1px solid ${colors('border')}`,
       ...createPressedColors(),
-      borderPressed: '1px solid ' + colors('main-brand'),
+      borderPressed: `1px solid ${colors('main-brand')}`,
       colorPressedError: colors('danger-hover'),
       borderPressedError: colors('danger-hover'),
     },
@@ -136,6 +154,6 @@ function naiveUiOverrides(customStyles: GlobalThemeOverrides) {
       iconMargin: '0 7px 0 0',
       closeIconColorHover: colors('danger-hover'),
     },
-    ...customStyles
+    ...customStyles,
   }))
 }

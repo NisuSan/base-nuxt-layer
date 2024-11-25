@@ -10,13 +10,14 @@
     "start": "nuxt start .playground",
     "generate": "nuxt generate .playground",
     "preview": "nuxt preview .playground",
-    "lint": "eslint .",
+    "biome:check": "pnpm dlx @biomejs/biome check ./",
+    "biome:ci": "pnpm dlx @biomejs/biome check ./",
     "cypess:open": "pnpm dlx cypress open"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@iconify-json/fa6-regular": "^1.2.1",
     "@iconify-json/fa6-solid": "^1.2.1",
-    "@nuxt/eslint": "latest",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "ansis": "^3.3.2",

@@ -10,27 +10,31 @@
 </template>
 
 <script setup lang="ts">
-  import { ukUA, dateUkUA, type GlobalThemeOverrides, type NLocale, type NDateLocale } from 'naive-ui'
+import { ukUA, dateUkUA, type GlobalThemeOverrides, type NLocale, type NDateLocale } from 'naive-ui'
 
-  const props = withDefaults(defineProps<{
+const props = withDefaults(
+  defineProps<{
     locale?: NLocale
-    dateLocale?: NDateLocale,
-    theme?: GlobalThemeOverrides,
+    dateLocale?: NDateLocale
+    theme?: GlobalThemeOverrides
     srrLoadingBarColor?: string
-  }>(), {
+  }>(),
+  {
     theme: () => ({}),
     srrLoadingBarColor: '#6067B1',
     // @ts-ignore
     locale: ukUA,
     // @ts-ignore
-    dateLocale: dateUkUA
-  })
+    dateLocale: dateUkUA,
+  }
+)
 
-  const isLoaded = ref(false)
-  const { themeUI } = useTheme({ naiveUIStyles: props.theme })
+const isLoaded = ref(false)
+const { themeUI } = useTheme({ naiveUIStyles: props.theme })
 
-  onMounted(() => { isLoaded.value = true })
-
+onMounted(() => {
+  isLoaded.value = true
+})
 </script>
 
 <style lang="scss" scoped>
