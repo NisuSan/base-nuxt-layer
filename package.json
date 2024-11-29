@@ -20,6 +20,7 @@
     "@iconify-json/fa6-solid": "^1.2.2",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/tailwindcss": "^6.12.2",
+    "@types/jsonwebtoken": "^9.0.7",
     "ansis": "^3.3.2",
     "cross-env": "^7.0.3",
     "cypress": "^13.16.0",
@@ -39,6 +40,7 @@
   "dependencies": {
     "@vueuse/core": "^11.3.0",
     "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "vue-tippy": "^6.5.0"
   }
 }

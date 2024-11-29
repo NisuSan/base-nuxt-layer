@@ -28,11 +28,9 @@ export default defineNuxtConfig({
     },
     plugins: [
       AutoImport({
-        imports: [
-          {
-            'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
-          },
-        ],
+        imports: [{
+          'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
+        }],
       }),
       Components({
         resolvers: [NaiveUiResolver(), IconsResolver()],
@@ -48,6 +46,7 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
+    jwtSecret: 'local_value_should_be_overridden_with_env_var',
     public: {
       joiSetup: { locales: 'enEn' },
     },

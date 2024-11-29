@@ -11,11 +11,23 @@ declare global {
     }
     type JoiSetup = { locales: JoiLocales; messages: JoiMessages }
     type ValidationDirective = Reactive<{ errors: { el: HTMLElement; message: string }[]; state: string }>
+    type User = {
+      id: number,
+      firstName: string,
+      lastName: string,
+      middleName: string,
+      mail?: string,
+      phone?: string,
+      roleId: number,
+      privileges: number[]
+    }
   }
 }
 
 declare module '@nuxt/schema' {
-  interface RuntimeConfig {}
+  interface RuntimeConfig {
+    jwtSecret: string
+  }
   interface PublicRuntimeConfig {
     joiSetup: Layer.JoiSetup
   }

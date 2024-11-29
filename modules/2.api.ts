@@ -44,7 +44,10 @@ function generateComposables(options: ModuleOptions) {
   const dirsForParse = [
     ...(options.includeFiles || []),
     join(useNuxt().options.rootDir, '/server/api/**/*.ts').replace(/\\/g, '/'),
+    localPath('../server/api/**/*.ts').replace(/\\/g, '/'),
   ]
+  console.log('Parsing', dirsForParse);
+
   const customApis = fg.sync(dirsForParse, { dot: true })
 
   if (customApis.length === 0) {
@@ -166,13 +169,15 @@ function getResultTypeFromAPI(file: string): { t: string; defaultValue: string }
       if (!expression) return false
 
       const identifier = expression.getExpressionIfKind(SyntaxKind.Identifier)
-      return identifier?.getText() === 'defineEventHandler'
+      return /^define.+Handler$/s.test(identifier?.getText() || '')
     })
     ?.getExpressionIfKind(SyntaxKind.CallExpression)
     ?.getArguments()[0] as ArrowFunction
 
   if (!arrowFunction) return undefined
   const arrowFunctionSourceFile = arrowFunction.getSourceFile()
+  console.log(arrowFunction.getText());
+
 
   const f = arrowFunction
     .getReturnType()
