@@ -1,7 +1,7 @@
 
 
 export function useAuth() {
-  const {data} = api().
+  const {data} = api().auth.signin()
 }
 
 /**

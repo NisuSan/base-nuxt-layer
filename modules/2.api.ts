@@ -46,7 +46,6 @@ function generateComposables(options: ModuleOptions) {
     join(useNuxt().options.rootDir, '/server/api/**/*.ts').replace(/\\/g, '/'),
     localPath('../server/api/**/*.ts').replace(/\\/g, '/'),
   ]
-  console.log('Parsing', dirsForParse);
 
   const customApis = fg.sync(dirsForParse, { dot: true })
 
@@ -163,7 +162,7 @@ function extractCustomApiTypes(file: string): CustomApiTypes {
 function getResultTypeFromAPI(file: string): { t: string; defaultValue: string } | undefined {
   const sourceFile = tsProject.addSourceFileAtPath(file)
 
-  const arrowFunction = sourceFile
+  const handlerArgs = sourceFile
     .getExportAssignment((exp: ExportAssignment) => {
       const expression = exp.getExpressionIfKind(SyntaxKind.CallExpression)
       if (!expression) return false
@@ -172,12 +171,12 @@ function getResultTypeFromAPI(file: string): { t: string; defaultValue: string }
       return /^define.+Handler$/s.test(identifier?.getText() || '')
     })
     ?.getExpressionIfKind(SyntaxKind.CallExpression)
-    ?.getArguments()[0] as ArrowFunction
+    ?.getArguments()
+
+  const arrowFunction = handlerArgs?.find(x => x.getKind() === SyntaxKind.ArrowFunction) as ArrowFunction | undefined
 
   if (!arrowFunction) return undefined
   const arrowFunctionSourceFile = arrowFunction.getSourceFile()
-  console.log(arrowFunction.getText());
-
 
   const f = arrowFunction
     .getReturnType()
@@ -211,14 +210,6 @@ function createDefaultvalue(type?: Type): string {
   }
 
   return 'undefined'
-}
-
-function capitalize(word: string) {
-  return word
-    ?.toLowerCase()
-    .split(' ')
-    .map(x => x.charAt(0).toUpperCase() + x.slice(1))
-    .join(' ')
 }
 
 function getUrlRouteFromFile(file: string) {
