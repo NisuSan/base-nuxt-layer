@@ -13,7 +13,7 @@ export function defineAuthHandler<T extends EventHandlerRequest, K extends AuthK
     try {
       const user = await handler(event)
 
-      if(user == null) throw createError({ message: 'User not found', statusCode: 404 })
+      if(user === null) throw createError({ message: 'User not found', statusCode: 404 })
       if(kind === 'signin') {
         const { password } = await readBody(event)
         const encryptedHash = pbkdf2Sync(password, (user as IneerHandlerResponse<'signin'>).salt, 10000, 512, 'sha512')

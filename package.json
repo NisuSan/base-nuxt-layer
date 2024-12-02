@@ -10,9 +10,12 @@
     "start": "nuxt start .playground",
     "generate": "nuxt generate .playground",
     "preview": "nuxt preview .playground",
-    "biome:check": "pnpm dlx @biomejs/biome check ./",
-    "biome:ci": "pnpm dlx @biomejs/biome check ./",
-    "cypess:open": "pnpm dlx cypress open"
+    "prisma-generate": "pnpx prisma generate",
+    "prisma-migrate-dev": "pnpx prisma migrate dev",
+    "prisma-seed": "pnpx tsx prisma/seed.ts",
+    "biome:check": "pnpx @biomejs/biome check ./",
+    "biome:ci": "pnpx @biomejs/biome check ./",
+    "cypess:open": "pnpx cypress open"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -20,6 +23,7 @@
     "@iconify-json/fa6-solid": "^1.2.2",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/tailwindcss": "^6.12.2",
+    "@prisma/client": "^6.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "ansis": "^3.3.2",
     "cross-env": "^7.0.3",
@@ -28,6 +32,7 @@
     "naive-ui": "^2.40.1",
     "nuxt": "^3.14.1592",
     "nuxtjs-naive-ui": "^1.0.2",
+    "prisma": "^6.0.0",
     "sass-embedded": "^1.81.0",
     "ts-morph": "^24.0.0",
     "typescript": "^5.7.2",

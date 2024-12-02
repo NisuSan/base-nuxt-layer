@@ -10,16 +10,18 @@ declare global {
       validators: Record<Partial<InputValidators>, Record<string, string>>
     }
     type JoiSetup = { locales: JoiLocales; messages: JoiMessages }
-    type ValidationDirective = Reactive<{ errors: { el: HTMLElement; message: string }[]; state: string }>
+    type ValidationDirective = Reactive<{ errors: { el: HTMLElement; message: string }[], state: string }>
+    type SignIn = { login: string, password: string }
+    type SignUp = { repeatedPaaword: string } & SignIn & Omit<User, 'id'>
     type User = {
       id: number,
-      firstName: string,
-      lastName: string,
-      middleName: string,
-      mail?: string,
-      phone?: string,
       roleId: number,
-      privileges: number[]
+      privileges: number[],
+      profile: {
+        firstName: string,
+        lastName: string,
+        middleName: string,
+      }[]
     }
   }
 }

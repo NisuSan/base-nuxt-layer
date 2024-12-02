@@ -38,6 +38,11 @@ export default defineNuxtConfig({
       Icons({ autoInstall: true }),
     ],
   },
+  nitro: {
+    experimental: {
+      asyncContext: true,
+    }
+  },
   tailwindcss: {
     cssPath: ['./assets/tailwind.css', { injectPosition: 'first' }],
     exposeConfig: {
