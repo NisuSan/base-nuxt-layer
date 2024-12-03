@@ -1,5 +1,6 @@
 import type { Reactive } from 'vue'
 
+type SignUpKind = 'base' | 'extended'
 declare global {
   namespace Layer {
     type InputValidators = 'string' | 'string-cyrillic' | 'string-latin' | 'number' | 'number-positive'
@@ -12,7 +13,9 @@ declare global {
     type JoiSetup = { locales: JoiLocales; messages: JoiMessages }
     type ValidationDirective = Reactive<{ errors: { el: HTMLElement; message: string }[], state: string }>
     type SignIn = { login: string, password: string }
-    type SignUp = { repeatedPaaword: string } & SignIn & Omit<User, 'id'>
+    type SignUp<K extends SignUpKind = 'base'> = K extends 'extended'
+      ? { repeatedPasword: string, mail: string } & SignIn & Omit<User, 'id'>
+      : { mail: string } & Omit<User, 'id'>
     type User = {
       id: number,
       roleId: number,

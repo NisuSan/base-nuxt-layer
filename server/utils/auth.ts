@@ -16,7 +16,7 @@ export async function useSignin() {
     salt: true,
     roleId: true,
     privileges: true,
-    profile: { select: { first_name: true, last_name: true, middle_name: true },  }
+    profile: { select: { firstName: true, lastName: true, middleName: true } }
   }, where: { login: input.login } })
   if(user === null) throw createError({ message: 'User not found', statusCode: 404 })
 
@@ -28,8 +28,24 @@ export async function useSignin() {
   return { ...makeSafeUser(user), token: generateJwt(user) }
 }
 
-export function useSignup() {
-  const event = useEvent()
+export async function useSignup() {
+  const nameValidator = Joi.string().pattern(/^[\u0400-\u04FF']+$/).required()
+  const input = await getData<Layer.SignUp<'base'>>('body', {
+    mail: Joi.string().pattern(/^[a-z]{3,}@kp-kvk\.dp\.ua$/s).email().required(),
+    privileges: Joi.array().items(Joi.number()).required(),
+    roleId: Joi.number().required(),
+    profile: Joi.object({ firstName: nameValidator, lastName: nameValidator, middleName: nameValidator })
+  })
+
+  const login = ''
+  if(await usePrisma().user.findFirst({ where: {
+    login, profile: { some: {
+      firstName: input.profile[0]?.firstName,
+      lastName:  input.profile[0]?.lastName,
+      middleName:  input.profile[0]?.middleName
+    }
+  }}})) throw createError({ message: 'User already exists', statusCode: 409 })
+  // const user = await usePrisma().user.create({ data: {} })
 }
 
 export function useSignout() {

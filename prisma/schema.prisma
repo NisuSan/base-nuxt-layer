@@ -16,8 +16,8 @@ datasource db {
 
 model Authorization {
   id         Int       @id @unique @default(autoincrement())
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
   user       User      @relation(fields: [userId], references: [id])
   token      String
   expires    DateTime
@@ -27,11 +27,11 @@ model Authorization {
 model Profile {
   id          Int       @id @unique @default(autoincrement())
   user        User      @relation(fields: [userId], references: [id])
-  created_at  DateTime  @default(now())
-  deleted_at  DateTime?
-  first_name  String
-  last_name   String
-  middle_name String
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+  firstName  String
+  lastName   String
+  middleName String
   email       String?
   phone       String?
   userId      Int
@@ -39,8 +39,8 @@ model Profile {
 
 model Role {
   id          Int       @id @unique @default(autoincrement())
-  created_at  DateTime  @default(now())
-  deleted_at  DateTime?
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
   name        String    @unique
   description String?
   privileges  Int[]
@@ -49,8 +49,8 @@ model Role {
 
 model User {
   id         Int       @id @unique @default(autoincrement())
-  created_at DateTime  @default(now())
-  deleted_at DateTime?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
   login      String    @unique
   hash       String    @unique
   salt       String    @unique
