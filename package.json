@@ -10,35 +10,35 @@
     "start": "nuxt start .playground",
     "generate": "nuxt generate .playground",
     "preview": "nuxt preview .playground",
-    "biome:check": "pnpm dlx @biomejs/biome check ./",
+    "biome:fix": "pnpm dlx @biomejs/biome check --fix ./",
     "biome:ci": "pnpm dlx @biomejs/biome check ./",
     "cypess:open": "pnpm dlx cypress open"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
     "@iconify-json/fa6-regular": "^1.2.2",
     "@iconify-json/fa6-solid": "^1.2.2",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.7.2",
+    "cypress": "^13.16.0"
+  },
+  "packageManager": "pnpm@9.14.2",
+  "dependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@vueuse/core": "^11.3.0",
+    "joi": "^17.13.3",
+    "vue-tippy": "^6.5.0",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "ansis": "^3.3.2",
-    "cross-env": "^7.0.3",
-    "cypress": "^13.16.0",
     "fast-glob": "^3.3.2",
     "naive-ui": "^2.40.1",
     "nuxt": "^3.14.1592",
     "nuxtjs-naive-ui": "^1.0.2",
     "sass-embedded": "^1.81.0",
     "ts-morph": "^24.0.0",
-    "typescript": "^5.7.2",
     "unplugin-auto-import": "^0.18.5",
     "unplugin-icons": "^0.20.1",
     "unplugin-vue-components": "^0.27.4",
     "vue": "latest"
-  },
-  "packageManager": "pnpm@9.14.2",
-  "dependencies": {
-    "@vueuse/core": "^11.3.0",
-    "joi": "^17.13.3",
-    "vue-tippy": "^6.5.0"
   }
 }
