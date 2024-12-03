@@ -1,4 +1,4 @@
-export default defineAuthHandler('signin', async event => {
+export default defineEventHandler(async event => {
   return {
     id: 1,
     roleId: 1,

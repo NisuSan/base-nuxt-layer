@@ -44,6 +44,7 @@
   "packageManager": "pnpm@9.14.2",
   "dependencies": {
     "@vueuse/core": "^11.3.0",
+    "cyrillic-to-translit-js": "^3.2.1",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "vue-tippy": "^6.5.0"

@@ -1,3 +1,3 @@
-export default defineAuthHandler('signout', async event => {
+export default defineEventHandler(async event => {
   return true
 })

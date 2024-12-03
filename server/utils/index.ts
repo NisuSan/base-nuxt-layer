@@ -1,8 +1,6 @@
 import Joi from 'joi'
 import { prisma } from '../../prisma/instance'
 
-type NestedObject = Record<string, unknown>
-
 export async function getData<T>(kind: 'body' | 'query' | 'params', validators?: { [K in keyof T]: Joi.AnySchema | Joi.Reference } ) {
   const target = (kind === 'body' ? await readBody(useEvent()) : kind === 'query' ? getQuery(useEvent()) : getRouterParams(useEvent())) as T
 
