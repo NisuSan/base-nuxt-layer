@@ -14,16 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Authorization {
-  id         Int       @id @unique @default(autoincrement())
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
-  user       User      @relation(fields: [userId], references: [id])
-  token      String
-  expires    DateTime
-  userId     Int
-}
-
 model Profile {
   id          Int       @id @unique @default(autoincrement())
   user        User      @relation(fields: [userId], references: [id])
@@ -58,5 +48,4 @@ model User {
   roleId     Int
   profile    Profile[]
   privileges Int[]
-  Authorization Authorization[]
 }

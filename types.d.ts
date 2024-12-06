@@ -1,6 +1,5 @@
 import type { Reactive } from 'vue'
 
-type SignUpKind = 'base' | 'extended'
 declare global {
   namespace Layer {
     type InputValidators = 'string' | 'string-cyrillic' | 'string-latin' | 'number' | 'number-positive'
@@ -13,9 +12,7 @@ declare global {
     type JoiSetup = { locales: JoiLocales; messages: JoiMessages }
     type ValidationDirective = Reactive<{ errors: { el: HTMLElement; message: string }[], state: string }>
     type SignIn = { login: string, password: string }
-    type SignUp<K extends SignUpKind = 'base'> = K extends 'extended'
-      ? { repeatedPasword: string, mail: string } & SignIn & Omit<User, 'id'>
-      : { mail: string } & Omit<User, 'id'>
+    type SignUp = Optionate<{ repeatedPasword: string, mail: string } & SignIn & Omit<User, 'id'>, 'login' | 'password' | 'repeatedPasword'>
     type User = {
       id: number,
       roleId: number,
@@ -27,19 +24,24 @@ declare global {
       }[]
     }
   }
+
+  type Optionate<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 }
 
 declare module '@nuxt/schema' {
   interface RuntimeConfig {
-    jwtSecret: string
+    baseLayer: {
+      auth: {
+        enabled: boolean,
+        jwtSecret: string,
+        jwtExpiresIn: number,
+        unprotectedRoutes: string[],
+        signupKind: 'base' | 'extended',
+        fallbackRoute: string
+      }
+    },
   }
   interface PublicRuntimeConfig {
     joiSetup: Layer.JoiSetup
-  }
-}
-
-declare module '@vue/runtime-core' {
-  export interface ComponentCustomProperties {
-    vValidation: Layer.ValidationDirective
   }
 }
