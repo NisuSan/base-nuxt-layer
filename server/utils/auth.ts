@@ -5,7 +5,21 @@ import cyrillicToTranslit from 'cyrillic-to-translit-js'
 
 type FullUser = { salt: string, hash: string } & Layer.User
 
-export async function useSignin() {
+/**
+ * Authenticates a user by validating login credentials and generating a JWT.
+ *
+ * This function retrieves login credentials from the request body, validates
+ * them against the database, and generates a JSON Web Token (JWT) if the
+ * credentials are correct. It sets the JWT in a cookie to maintain the user's
+ * session. If the user is not found or the credentials are incorrect, an error
+ * is thrown.
+ *
+ * @augments Layer.SignIn accessing with `useData('body')`
+ *
+ * @throws `NuxtError` If the user is not found or the password is incorrect.
+ * @returns {Promise<Layer.User>} A safe user object excluding sensitive information.
+ */
+export async function useSignin(): Promise<Layer.User> {
   const input = await useData<Layer.SignIn>('body', {
     login: Joi.string().alphanum().min(3).max(16).required(),
     password: Joi.string().alphanum().min(3).max(16).required()
@@ -36,7 +50,21 @@ export async function useSignin() {
   return makeSafeUser(user)
 }
 
-export async function useSignup() {
+/**
+ * Handles the user signup process by validating the input data,
+ * checking for existing users, and creating a new user record.
+ *
+ * This function retrieves signup data from the request body,
+ * validates it using specified Joi schemas, and checks if a user
+ * with the same login and profile already exists in the database.
+ * If not, it creates a new user with the provided details.
+ *
+ * @augments Layer.SignUp accessing with `useData('body')`
+ *
+ * @throws `NuxtError` If the user already exists or creation fails.
+ * @returns {Promise<boolean>} True if the user is successfully created.
+ */
+export async function useSignup(): Promise<boolean> {
   const kind = useRuntimeConfig().baseLayer.auth.signupKind
   const nameValidator = Joi.string().pattern(/^[\u0400-\u04FF']+$/).required()
 
@@ -80,7 +108,7 @@ export async function useSignup() {
 
 export function useSignout() {
   const event = useEvent()
-
+  // TODO: remove cookie
 }
 
 function generateJwt(user: Layer.User) {

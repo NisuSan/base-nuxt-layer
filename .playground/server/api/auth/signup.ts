@@ -1,3 +1,1 @@
-export default defineEventHandler(async event => {
-  return true
-})
+export default defineEventHandler(async event => {})
