@@ -42,6 +42,8 @@ declare module '@nuxt/schema' {
     },
   }
   interface PublicRuntimeConfig {
-    joiSetup: Layer.JoiSetup
+    baseLayer: {
+      joiSetup: Layer.JoiSetup
+    }
   }
 }

@@ -29,10 +29,9 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', 'nuxtjs-naive-ui', 'unplugin-icons/nuxt'],
   vite: {
     optimizeDeps: {
-      include:
-        process.env.NODE_ENV === 'development'
-          ? [localPath('./node_modules/naive-ui'), localPath('./node_modules/vueuc')]
-          : [],
+      include: process.env.NODE_ENV === 'development'
+        ? [localPath('./node_modules/naive-ui'), localPath('./node_modules/vueuc')]
+        : [],
     },
     ssr: {
       noExternal: ['naive-ui'],
@@ -62,10 +61,12 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    ...layerOptions.baseLayer,
+    baseLayer: layerOptions.baseLayer,
     public: {
-      joiSetup: { locales: 'enEn' },
-      ...layerOptions.publicLayer
+      baseLayer: {
+        joiSetup: { locales: 'enEn' },
+        ...layerOptions.publicLayer
+      }
     },
   },
 })

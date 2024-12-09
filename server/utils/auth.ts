@@ -1,5 +1,4 @@
 import Joi from 'joi'
-import { sign } from 'jsonwebtoken'
 import { pbkdf2Sync, randomBytes, randomInt } from 'node:crypto'
 import cyrillicToTranslit from 'cyrillic-to-translit-js'
 
@@ -33,14 +32,12 @@ export async function useSignin(): Promise<Layer.User> {
     privileges: true,
     profile: { select: { firstName: true, lastName: true, middleName: true } }
   }, where: { login: input.login } })
-  if(user === null) throw createError({ message: 'User not found', statusCode: 404 })
+  if(user === null) throw createError({ statusCode: 404, message: 'User not found' })
 
-  const { password } = await readBody(useEvent())
-  const encryptedHash = pbkdf2Sync(password, user.salt, 10000, 512, 'sha512')
+  const encryptedHash = pbkdf2Sync(input.password, user.salt, 10000, 512, 'sha512')
+  if(user.hash !== encryptedHash.toString('hex')) throw createError({ statusCode: 404, message: 'User not found' })
 
-  if(user.hash !== encryptedHash.toString()) throw createError({ statusCode: 404, statusMessage: 'User not found' })
-
-  setCookie(useEvent(), 'Authorization', generateJwt(user), {
+  setCookie(useEvent(), 'Authorization', await generateJwt(user), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV !== 'development',
@@ -64,15 +61,15 @@ export async function useSignin(): Promise<Layer.User> {
  * @throws `NuxtError` If the user already exists or creation fails.
  * @returns {Promise<boolean>} True if the user is successfully created.
  */
-export async function useSignup(): Promise<boolean> {
+export async function useSignup(): Promise<{ login: string, password: string }> {
   const kind = useRuntimeConfig().baseLayer.auth.signupKind
   const nameValidator = Joi.string().pattern(/^[\u0400-\u04FF']+$/).required()
 
   const input = await useData<Layer.SignUp>('body', {
-    mail: Joi.string().pattern(/^[a-z]{3,}@kp-kvk\.dp\.ua$/s).email().required(),
+    mail: Joi.string().email().required(),
     privileges: Joi.array().items(Joi.number()).required(),
     roleId: Joi.number().required(),
-    profile: Joi.object({ firstName: nameValidator, lastName: nameValidator, middleName: nameValidator }),
+    profile: Joi.object({ firstName: nameValidator, lastName: nameValidator, middleName: nameValidator }).required(),
     ...( kind === 'extended' ? {
       login: Joi.string().alphanum().min(3).max(16).required(),
       password: Joi.string().alphanum().min(3).max(16).required(),
@@ -80,7 +77,11 @@ export async function useSignup(): Promise<boolean> {
     } : { })
   })
 
-  const login = cyrillicToTranslit({ preset: 'uk' }).transform(useInitialFromFullName(input.profile, 'auth').toLowerCase())
+  const login = input.login ?? cyrillicToTranslit({ preset: 'uk' })
+    .transform(useInitialFromFullName(
+      input.profile as unknown as Record<'firstName' | 'lastName' | 'middleName', string>, 'auth'
+  ).toLowerCase())
+
   if(await usePrisma().user.findFirst({ where: {
     login,
     profile: { some: {
@@ -91,7 +92,8 @@ export async function useSignup(): Promise<boolean> {
   }}})) throw createError({ message: 'User already exists', statusCode: 409 })
 
   const salt = randomBytes(128).toString('base64')
-  const hash = pbkdf2Sync(input.password ?? generatePassword(), salt, 10000, 512, 'sha512').toString('hex')
+  const password = input.password ?? generatePassword()
+  const hash = pbkdf2Sync(password, salt, 10000, 512, 'sha512').toString('hex')
 
   const user = await usePrisma().user.create({ select: { id: true }, data: {
     login,
@@ -102,8 +104,8 @@ export async function useSignup(): Promise<boolean> {
     profile: { create: { ...input.profile, email: input.mail } }
   }})
 
-  if(user.id === null) throw createError({ message: 'User not created', statusCode: 500 })
-  return true
+  if(user.id === null) throw createError({ statusCode: 500, message: 'User not created' })
+  return { login, password }
 }
 
 export function useSignout() {
@@ -111,9 +113,17 @@ export function useSignout() {
   // TODO: remove cookie
 }
 
-function generateJwt(user: Layer.User) {
+async function generateJwt(user: Layer.User) {
   const runtimeConfig = useRuntimeConfig()
-  return sign({id: user.id, privileges: user.privileges, roleId: user.roleId, scope: ['accsess', 'user'] }, runtimeConfig.baseLayer.auth.jwtSecret, { expiresIn: '1d' })
+
+  return (await import('jsonwebtoken')).default.sign({
+    id: user.id,
+    privileges: user.privileges,
+    roleId: user.roleId,
+    scope: ['accsess', 'user'] },
+    runtimeConfig.baseLayer.auth.jwtSecret,
+    { expiresIn: '1d',  }
+  )
 }
 
 function makeSafeUser(user: FullUser) {

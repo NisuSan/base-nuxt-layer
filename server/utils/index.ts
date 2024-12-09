@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/instance'
 
 type RequestTypes = 'body' | 'query' | 'params'
 type Validators<T> = { [K in keyof T]: Joi.AnySchema | Joi.Reference }
-type Profile = { firstName: string, lastName: string, middleName: string }[]
+type Profile = { firstName: string, lastName: string, middleName: string }
 
 /**
  * Get the data from the current request context.
@@ -41,8 +41,7 @@ export function usePrisma() {
  * @returns The initials of the first, last, and middle name as a single string.
  */
 export function useInitialFromFullName(profile: Profile, kind: 'auth' | 'regular' = 'regular') {
-  if(profile.length === 0) throw createError({ message: 'Profile is empty', statusCode: 404 })
-  return profile[0]?.firstName
+  return profile.lastName
     + (kind === 'auth' ? '' : ' ')
-    + [ profile[0]?.lastName.slice(0, 1), profile[0]?.middleName.slice(0, 1)].join(kind === 'auth' ? '' : '.')
+    + [ profile.firstName.slice(0, 1), profile.middleName.slice(0, 1)].join(kind === 'auth' ? '' : '.')
 }

@@ -63,8 +63,9 @@ export function createLayerConfig(
       const val = obj[key]
       const newPath = [...path, key]
 
-      if (Array.isArray(val)) {
+      if (Array.isArray(val) && val.length === 2 && ['client', 'server', 'both'].includes(val[1])) {
         const [actualValue, level] = val as [unknown, 'client' | 'server' | 'both']
+
         switch (level) {
           case 'client':
             assignValue(publicLayer, newPath, actualValue)
@@ -77,7 +78,7 @@ export function createLayerConfig(
             assignValue(publicLayer, newPath, actualValue)
             break
         }
-      } else if (val && typeof val === 'object' && !(val instanceof Date)) {
+      } else if (val && typeof val === 'object' && !(val instanceof Date) && !Array.isArray(val)) {
         stack.push({ obj: val as Record<string, unknown>, path: newPath })
       } else {
         assignValue(baseLayer, newPath, val)
