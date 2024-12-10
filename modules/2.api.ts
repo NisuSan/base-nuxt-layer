@@ -78,7 +78,7 @@ function generateComposables(options: ModuleOptions) {
     return {
       group,
       method: `
-      ${fnName}<T = '${group}.${parsed.name}'>(params?: Ref<APIParams<T>> | APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
+      ${fnName}<T = '${group}.${parsed.name}'>(params: APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
         // @ts-expect-error
         return useExtendedFetch<APIOutput<T>>(\`${route}\`, '${parts[1] || 'get'}', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) }) as AsyncData<APIOutput<T>, Error>
       }
@@ -113,15 +113,15 @@ function generateComposables(options: ModuleOptions) {
     export function useExtendedFetch<T>(
       url: string,
       method: string = 'get',
-      params?: Ref<APIParams<T>> | APIParams<T>,
+      params?: APIParams<T>,
       options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { default?: () => APIOutput<T>, withCache?: boolean | number }
     ) {
-      const isHasArray = Object.values(unref(params) || {}).some(value => Array.isArray(value))
+      const isHasArray = Object.values(params || {}).some(value => Array.isArray(value))
       // @ts-expect-error
       return useFetch<APIOutput<T>>(url, {
         method,
         [['get', 'delete'].includes(method) ? 'query' : 'body']: isHasArray
-          ? Object.fromEntries(Object.entries(unref(params) || {}).map(([k, v]) => [Array.isArray(v) ? \`\${k}[]\` : k, toRaw(v)]))
+          ? Object.fromEntries(Object.entries(params || {}).map(([k, v]) => [Array.isArray(v) ? \`\${k}[]\` : k, toRaw(v)]))
           : params,
         lazy: true,
         getCachedData: options?.withCache === true ? (key: string | number, nuxtApp: { payload: { data: { [x: string]: any; }; }; static: { data: { [x: string]: any; }; }; }) => {
@@ -140,10 +140,8 @@ function generateComposables(options: ModuleOptions) {
 function extractCustomApiTypes(file: string): CustomApiTypes {
   const content = readFileSync(file).toString('utf8')
 
-  const matchArgs = content.match(/type\s?QueryArgs\s?=\s?({[^}]*}|[^{;\n]+)/)
-  const argsType = matchArgs
-    ? matchArgs[1]?.replaceAll('\r\n', '').replaceAll('{', '{ ').replaceAll('}', ' }').replaceAll(/ +/g, ' ')
-    : '{}'
+  const matchArgs = content.match(/<[^,]*,\s*([^>]+)>/)
+  const argsType = matchArgs?.[1] || '{}'
 
   const resultType = getResultTypeFromAPI(file) || { t: '{}', defaultValue: '{}' }
   const parsed = parse(file)

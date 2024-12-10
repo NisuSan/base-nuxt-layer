@@ -23,8 +23,10 @@ declare global {
         middleName: string,
       }[]
     }
+    type SessionData = { user: User }
   }
 
+  type _ = unknown
   type Optionate<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 }
 
@@ -37,13 +39,16 @@ declare module '@nuxt/schema' {
         jwtExpiresIn: number,
         unprotectedRoutes: string[],
         signupKind: 'base' | 'extended',
-        fallbackRoute: string
+        fallbackRoute: string,
+        sesionPrivateKey: string
       }
     },
   }
   interface PublicRuntimeConfig {
     baseLayer: {
-      joiSetup: Layer.JoiSetup
+      joiSetup: Layer.JoiSetup,
+      jwtExpiresIn: number,
+      fallbackRoute: string
     }
   }
 }

@@ -1,1 +1,1 @@
-export default defineEventHandler(async event => useSignin())
+export default defineEventHandler<_, Layer.SignIn>(async event => useSignin())

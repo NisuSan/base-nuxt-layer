@@ -24,27 +24,40 @@ export async function useSignin(): Promise<Layer.User> {
     password: Joi.string().alphanum().min(3).max(16).required()
   })
 
-  const user = await usePrisma().user.findUnique({ select: {
-    id: true,
-    hash: true,
-    salt: true,
-    roleId: true,
-    privileges: true,
-    profile: { select: { firstName: true, lastName: true, middleName: true } }
-  }, where: { login: input.login } })
-  if(user === null) throw createError({ statusCode: 404, message: 'User not found' })
+  if(input.login !== 'admin' || input.password !== 'admin')
+    throw createError({ statusCode: 404, message: 'User not found' })
 
-  const encryptedHash = pbkdf2Sync(input.password, user.salt, 10000, 512, 'sha512')
-  if(user.hash !== encryptedHash.toString('hex')) throw createError({ statusCode: 404, message: 'User not found' })
+  // const user = await usePrisma().user.findUnique({ select: {
+  //   id: true,
+  //   hash: true,
+  //   salt: true,
+  //   roleId: true,
+  //   privileges: true,
+  //   profile: { select: { firstName: true, lastName: true, middleName: true } }
+  // }, where: { login: input.login } })
+  // if(user === null) throw createError({ statusCode: 404, message: 'User not found' })
 
-  setCookie(useEvent(), 'Authorization', await generateJwt(user), {
+  // const encryptedHash = pbkdf2Sync(input.password, user.salt, 10000, 512, 'sha512')
+  // if(user.hash !== encryptedHash.toString('hex')) throw createError({ statusCode: 404, message: 'User not found' })
+
+  // const safeUser = makeSafeUser(user);
+  const safeUser: Layer.User = {
+    id: 1,
+    roleId: 1,
+    privileges: [1, 2, 3, 4, 5, 6],
+    profile: [{ firstName: 'Admin', lastName: 'Admin', middleName: 'Admin' }]
+  }
+
+  await setSession({ user: safeUser })
+  setCookie(useEvent(), 'Authorization', await generateJwt(), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV !== 'development',
     maxAge: useRuntimeConfig().baseLayer.auth.jwtExpiresIn,
     path: '/'
   })
-  return makeSafeUser(user)
+
+  return safeUser
 }
 
 /**
@@ -109,20 +122,17 @@ export async function useSignup(): Promise<{ login: string, password: string }> 
 }
 
 export function useSignout() {
-  const event = useEvent()
-  // TODO: remove cookie
+  deleteCookie(useEvent(), 'Authorization')
+
 }
 
-async function generateJwt(user: Layer.User) {
-  const runtimeConfig = useRuntimeConfig()
+async function generateJwt() {
+  const { jwtSecret, jwtExpiresIn } = useRuntimeConfig().baseLayer.auth
 
-  return (await import('jsonwebtoken')).default.sign({
-    id: user.id,
-    privileges: user.privileges,
-    roleId: user.roleId,
-    scope: ['accsess', 'user'] },
-    runtimeConfig.baseLayer.auth.jwtSecret,
-    { expiresIn: '1d',  }
+  return (await import('jsonwebtoken')).default.sign(
+    { info: new Date(), scope: ['accsess'] },
+    jwtSecret,
+    { expiresIn: jwtExpiresIn }
   )
 }
 

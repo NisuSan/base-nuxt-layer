@@ -8,11 +8,12 @@ import { createLayerConfig, localPath } from './utils/index.server'
 const layerOptions = createLayerConfig({
   auth: {
     enabled: true,
-    jwtSecret: 'local_value_should_be_overridden_with_env_var',
+    jwtSecret: 'local_value_should_be_overridden_with_env_var_1',
     jwtExpiresIn: [60 * 60 * 24, 'both'], // 1d
     unprotectedRoutes: ['auth'],
     signupKind: 'base',
     fallbackRoute: ['/auth', 'both'],
+    sesionPrivateKey: 'local_value_should_be_overridden_with_env_var_2',
   },
 })
 
