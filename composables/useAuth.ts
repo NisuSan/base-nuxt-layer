@@ -22,6 +22,7 @@ type ResponseData<T> = T extends 'signin'
 export function useAuth() {
   const signIn = async (data: Layer.SignIn) => {
     const user = await baseApiCall('signin', data)
+    // const { data: user } = await api().auth.signin(data)
     console.log(user);
 
 
@@ -53,7 +54,7 @@ export function useAuth() {
 async function baseApiCall<T extends TLit>(fn: T, data: RequestData<T>): Promise<ResponseData<T>> {
   // @ts-expect-error the type signature is the same but T has additional literal text 'auth.'
   const { data: result, error } = await api().auth[fn](data)
-  if (error) throw error
+  if (error.value) throw error
 
   // @ts-expect-error the type signature is the same but T has additional literal text 'auth.'
   return result.value
