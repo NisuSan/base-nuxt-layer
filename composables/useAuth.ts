@@ -21,8 +21,8 @@ type ResponseData<T> = T extends 'signin'
 
 export function useAuth() {
   const signIn = async (data: Layer.SignIn) => {
-    const user = await baseApiCall('signin', data)
-    // const { data: user } = await api().auth.signin(data)
+    // const user = await baseApiCall('signin', data)
+    const { data: user } = await api().auth.signin(data)
     console.log(user);
 
 

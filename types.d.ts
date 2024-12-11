@@ -50,9 +50,11 @@ declare module '@nuxt/schema' {
   interface PublicRuntimeConfig {
     baseLayer: {
       joiSetup: Layer.JoiSetup
-      jwtExpiresIn: number
-      fallbackRoute: string
-      unprotectedRoutes: string[]
+      auth: {
+        jwtExpiresIn: number
+        fallbackRoute: string
+        unprotectedRoutes: string[]
+      }
     }
   }
 }
