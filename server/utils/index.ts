@@ -3,7 +3,7 @@ import { prisma } from '../../prisma/instance'
 
 type RequestTypes = 'body' | 'query' | 'params'
 type Validators<T> = { [K in keyof T]: Joi.AnySchema | Joi.Reference }
-type Profile = { firstName: string, lastName: string, middleName: string }
+type Profile = { firstName: string; lastName: string; middleName: string }
 
 /**
  * Get the data from the current request context.
@@ -14,13 +14,15 @@ type Profile = { firstName: string, lastName: string, middleName: string }
  * @returns The validated data or the original data if no validators are provided.
  */
 export async function useData<T>(kind: RequestTypes, validators?: Validators<T>) {
-  const target = (kind === 'body' ? await readBody(useEvent()) : kind === 'query' ? getQuery(useEvent()) : getRouterParams(useEvent())) as T
+  const target = (
+    kind === 'body' ? await readBody(useEvent()) : kind === 'query' ? getQuery(useEvent()) : getRouterParams(useEvent())
+  ) as T
 
-  if(!validators) return target
+  if (!validators) return target
   const schema = Joi.object(validators)
   const test = schema.validate(target)
 
-  if(test.error) throw createError({ message: test.error.message, statusCode: 422 })
+  if (test.error) throw createError({ message: test.error.message, statusCode: 422 })
   return target
 }
 
@@ -34,9 +36,11 @@ export async function setSession(data: Layer.SessionData) {
 }
 
 export async function getUser() {
-  return (await getSession<Layer.SessionData>(useEvent(), {
-    password: useRuntimeConfig().baseLayer.auth.sesionPrivateKey
-  })).data.user
+  return (
+    await getSession<Layer.SessionData>(useEvent(), {
+      password: useRuntimeConfig().baseLayer.auth.sesionPrivateKey,
+    })
+  ).data.user
 }
 
 /**
@@ -52,7 +56,9 @@ export async function getUser() {
  * @returns The initials of the first, last, and middle name as a single string.
  */
 export function useInitialFromFullName(profile: Profile, kind: 'auth' | 'regular' = 'regular') {
-  return profile.lastName
-    + (kind === 'auth' ? '' : ' ')
-    + [ profile.firstName.slice(0, 1), profile.middleName.slice(0, 1)].join(kind === 'auth' ? '' : '.')
+  return (
+    profile.lastName +
+    (kind === 'auth' ? '' : ' ') +
+    [profile.firstName.slice(0, 1), profile.middleName.slice(0, 1)].join(kind === 'auth' ? '' : '.')
+  )
 }

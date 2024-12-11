@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import type { RuntimeConfig } from 'nuxt/schema'
 
-type ConfigurableValue<T> = T extends Record<string, unknown> ? Configurable<T> : T;
+type ConfigurableValue<T> = T extends Record<string, unknown> ? Configurable<T> : T
 type Configurable<T> = {
   [K in keyof T]: ConfigurableValue<T[K]> | [ConfigurableValue<T[K]>, 'client' | 'server' | 'both']
 }
@@ -27,9 +27,10 @@ export function localPath(path: string) {
  * @returns An object with two properties, `baseLayer` and `publicLayer` which
  * contain the respective layers.
  */
-export function createLayerConfig(
-  options: Configurable<RuntimeConfig['baseLayer']>
-): { baseLayer: RuntimeConfig['baseLayer']; publicLayer: Partial<RuntimeConfig['baseLayer']> } {
+export function createLayerConfig(options: Configurable<RuntimeConfig['baseLayer']>): {
+  baseLayer: RuntimeConfig['baseLayer']
+  publicLayer: Partial<RuntimeConfig['baseLayer']>
+} {
   const baseLayer = {} as RuntimeConfig['baseLayer']
   const publicLayer = {} as Partial<RuntimeConfig['baseLayer']>
 
@@ -40,7 +41,7 @@ export function createLayerConfig(
 
     for (let i = 0; i < lastIndex; i++) {
       const segment = path[i]
-      if(segment === '' || segment === undefined) continue
+      if (segment === '' || segment === undefined) continue
 
       let next = current[segment]
       if (typeof next !== 'object' || next === null) {
@@ -53,7 +54,7 @@ export function createLayerConfig(
     current[path[lastIndex]] = value
   }
 
-  type StackEntry = { obj: Record<string, unknown>, path: string[] }
+  type StackEntry = { obj: Record<string, unknown>; path: string[] }
   const stack: StackEntry[] = [{ obj: options as Record<string, unknown>, path: [] }]
 
   while (stack.length > 0) {

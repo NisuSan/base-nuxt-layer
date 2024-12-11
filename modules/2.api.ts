@@ -67,27 +67,29 @@ function generateComposables(options: ModuleOptions) {
   let definedManualRoutes: string | string[] = customApis.map(x => `"${parse(x).name}"`)
   definedManualRoutes = definedManualRoutes.length > 0 ? definedManualRoutes.join(' | ') : 'undefined'
 
-  const apiFunctions = Object.entries(customApis.map(x => {
-    const parsed = parse(x)
-    const group = parsed.dir.split('/').reverse()[0]
-    const parts = parsed.name.split('.')
+  const apiFunctions = Object.entries(
+    customApis
+      .map(x => {
+        const parsed = parse(x)
+        const group = parsed.dir.split('/').reverse()[0]
+        const parts = parsed.name.split('.')
 
-    const fnName = snakeToCamel(parts[0] || 'data')
-    const route = getUrlRouteFromFile(x)
+        const fnName = snakeToCamel(parts[0] || 'data')
+        const route = getUrlRouteFromFile(x)
 
-    return {
-      group,
-      method: `
+        return {
+          group,
+          method: `
       ${fnName}<T = '${group}.${parsed.name}'>(params: APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
         // @ts-expect-error
         return useExtendedFetch<APIOutput<T>>(\`${route}\`, '${parts[1] || 'get'}', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) }) as AsyncData<APIOutput<T>, Error>
       }
     `,
-    }
-  })
-    // @ts-expect-error avoid checking for undefined because it's failed earlier in case of it
-    // biome-ignore lint/performance/noAccumulatingSpread: the result is small and has object type
-    .reduce((r, a) => ({ ...r, [a.group]: [...(r[a.group] || []), a.method] }), {})
+        }
+      })
+      // @ts-expect-error avoid checking for undefined because it's failed earlier in case of it
+      // biome-ignore lint/performance/noAccumulatingSpread: the result is small and has object type
+      .reduce((r, a) => ({ ...r, [a.group]: [...(r[a.group] || []), a.method] }), {})
   ).map(([k, v]) => (k === 'api' ? (v as string[]).join(',') : `${k}: {${(v as string[]).join(',')}}`))
 
   const composableText = `
@@ -140,7 +142,7 @@ function generateComposables(options: ModuleOptions) {
 function extractCustomApiTypes(file: string): CustomApiTypes {
   const content = readFileSync(file).toString('utf8')
 
-  const matchArgs = content.match(/<[^,]*,\s*([^>]+)>/)
+  const matchArgs = content.match(/EventHandler<[^,]*,\s*([^>]+)>/)
   const argsType = matchArgs?.[1] || '{}'
 
   const resultType = getResultTypeFromAPI(file) || { t: '{}', defaultValue: '{}' }

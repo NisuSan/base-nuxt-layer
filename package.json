@@ -13,7 +13,7 @@
     "prisma-generate": "pnpx prisma generate",
     "prisma-migrate-dev": "pnpx prisma migrate dev",
     "prisma-seed": "pnpx tsx prisma/seed.ts",
-    "biome:check": "pnpx @biomejs/biome check ./",
+    "biome:fix": "pnpx @biomejs/biome check ./ --fix",
     "biome:ci": "pnpx @biomejs/biome check ./",
     "cypess:open": "pnpx cypress open"
   },

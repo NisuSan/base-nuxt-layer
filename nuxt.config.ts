@@ -10,7 +10,7 @@ const layerOptions = createLayerConfig({
     enabled: true,
     jwtSecret: 'local_value_should_be_overridden_with_env_var_1',
     jwtExpiresIn: [60 * 60 * 24, 'both'], // 1d
-    unprotectedRoutes: ['auth'],
+    unprotectedRoutes: [['auth'], 'both'],
     signupKind: 'base',
     fallbackRoute: ['/auth', 'both'],
     sesionPrivateKey: 'local_value_should_be_overridden_with_env_var_2',
@@ -30,18 +30,21 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', 'nuxtjs-naive-ui', 'unplugin-icons/nuxt'],
   vite: {
     optimizeDeps: {
-      include: process.env.NODE_ENV === 'development'
-        ? [localPath('./node_modules/naive-ui'), localPath('./node_modules/vueuc')]
-        : [],
+      include:
+        process.env.NODE_ENV === 'development'
+          ? [localPath('./node_modules/naive-ui'), localPath('./node_modules/vueuc')]
+          : [],
     },
     ssr: {
       noExternal: ['naive-ui'],
     },
     plugins: [
       AutoImport({
-        imports: [{
-          'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
-        }],
+        imports: [
+          {
+            'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar'],
+          },
+        ],
       }),
       Components({
         resolvers: [NaiveUiResolver(), IconsResolver()],
@@ -52,7 +55,7 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       asyncContext: true,
-    }
+    },
   },
   tailwindcss: {
     cssPath: ['./assets/tailwind.css', { injectPosition: 'first' }],
@@ -66,10 +69,8 @@ export default defineNuxtConfig({
     public: {
       baseLayer: {
         joiSetup: { locales: 'enEn' },
-        ...layerOptions.publicLayer
-      }
+        ...layerOptions.publicLayer,
+      },
     },
   },
 })
-
-

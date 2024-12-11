@@ -4,7 +4,7 @@ import { greenBright, blue } from 'ansis'
 const prisma = new PrismaClient()
 
 async function main() {
-  const decapitalize = (str: string)=> str.charAt(0).toLowerCase()+str.slice(1)
+  const decapitalize = (str: string) => str.charAt(0).toLowerCase() + str.slice(1)
 
   const usersData: Prisma.Enumerable<Prisma.UserCreateManyInput> = [
     {
@@ -13,7 +13,7 @@ async function main() {
       hash: 'wtfisgoinghere',
       login: 'worker',
       salt: 'wtfisgoinghere',
-    }
+    },
   ]
 
   const profilesData: Prisma.Enumerable<Prisma.ProfileCreateManyInput> = [
@@ -23,7 +23,7 @@ async function main() {
       first_name: 'Worker',
       last_name: 'Worker',
       middle_name: 'Worker',
-    }
+    },
   ]
 
   const rolesData: Prisma.Enumerable<Prisma.RoleCreateManyInput> = [
@@ -31,25 +31,25 @@ async function main() {
       id: 1,
       name: 'Розробник',
       description: 'Максимальні права на весь функціонал програми, включаючи тестові функції',
-      privileges: []
+      privileges: [],
     },
     {
       id: 2,
       name: 'Робот',
       description: 'Призначено для скриптових задач',
-      privileges: []
+      privileges: [],
     },
     {
       id: 3,
       name: 'Адміністратор',
       description: 'Призначено для працівніків енергоменеджменту',
-      privileges: []
+      privileges: [],
     },
     {
       id: 4,
       name: 'Субабонент',
       description: 'Призначено для клієнтів купуючих електроенергію',
-      privileges: []
+      privileges: [],
     },
   ]
 
@@ -68,12 +68,14 @@ async function main() {
   }
 }
 
-main().then(async () => {
-  console.info(`${greenBright('✔')} All tables was filled.`)
-  await prisma.$disconnect()
-  process.exit(0)
-}).catch(async (e) => {
-  console.error(e)
-  await prisma.$disconnect()
-  process.exit(1)
-})
+main()
+  .then(async () => {
+    console.info(`${greenBright('✔')} All tables was filled.`)
+    await prisma.$disconnect()
+    process.exit(0)
+  })
+  .catch(async e => {
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })
