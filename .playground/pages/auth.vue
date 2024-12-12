@@ -1,6 +1,6 @@
 <template>
   <div>
-    <n-button type="primary" @click="() => api().auth.signin({ login: 'admin', password: 'admin' })">Login</n-button>
+    <n-button type="primary" @click="() =>{}">Login</n-button>
     {{ isAuthenticated }}<br>
     {{ user }}
   </div>

@@ -81,8 +81,10 @@ function generateComposables(options: ModuleOptions) {
           group,
           method: `
       ${fnName}<T = '${group}.${parsed.name}'>(params: APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
-        // @ts-expect-error
-        return useExtendedFetch<APIOutput<T>>(\`${route}\`, '${parts[1] || 'get'}', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) }) as AsyncData<APIOutput<T>, Error>
+        return callFetchData<T, 'fetch'>(\`${route}\`, '${parts[1] || 'get'}', 'fetch', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) })
+      },
+      ${fnName}Async<T = '${group}.${parsed.name}'>(params: APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
+        return callFetchData<T, 'async'>(\`${route}\`, '${parts[1] || 'get'}', 'async', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) })
       }
     `,
         }
@@ -99,6 +101,8 @@ function generateComposables(options: ModuleOptions) {
     export type APIParams<T> = ${compiledInputTypes};
     export type APIOutput<T> = ${compiledOutputTypes};
     export const defaults = ${compiledDefaults};
+    type APIMode = 'fetch' | 'async'
+    type EndpointReturn<T, M=APIMode> = M extends 'fetch' ? AsyncData<APIOutput<T>, Error> : M extends 'async' ? Promise<APIOutput<T>> : never
 
     const dfBuilder = (n: string, d: unknown) => () => ref(Array.isArray(defaults[n])
       ? d || defaults[n]
@@ -112,15 +116,15 @@ function generateComposables(options: ModuleOptions) {
       }
     }
 
-    export function useExtendedFetch<T>(
+    function callFetchData<T, APIMode>(
       url: string,
       method: string = 'get',
+      mode: APIMode,
       params?: APIParams<T>,
-      options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { default?: () => APIOutput<T>, withCache?: boolean | number }
-    ) {
+      options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { default?: () => APIOutput<T>, withCache?: boolean | number },
+    ): EndpointReturn<T, APIMode> {
       const isHasArray = Object.values(params || {}).some(value => Array.isArray(value))
-      // @ts-expect-error
-      return useFetch<APIOutput<T>>(url, {
+      const optionsInfo = {
         method,
         [['get', 'delete'].includes(method) ? 'query' : 'body']: isHasArray
           ? Object.fromEntries(Object.entries(params || {}).map(([k, v]) => [Array.isArray(v) ? \`\${k}[]\` : k, toRaw(v)]))
@@ -130,11 +134,20 @@ function generateComposables(options: ModuleOptions) {
           return nuxtApp.payload.data[key] || nuxtApp.static.data[key]
         } : undefined,
         default: () => [],
-        ...options }
-      )  as AsyncData<APIOutput<T>, Error>
+        ...options
+      }
+
+      return (mode === 'fetch'
+        ? fetchData<APIOutput<T>>(url, optionsInfo)
+        : $fetch(url, optionsInfo)) as EndpointReturn<T, APIMode>
+    }
+
+    function fetchData<T>(url: string, options?: any) {
+      return import.meta.server
+        ? useFetch<T>(url, options)
+        : useNonSSRFetch<T>(url, options)
     }
   `
-
   writeFileSync(localPath('../composables/__api.ts'), composableText)
   return 0
 }
