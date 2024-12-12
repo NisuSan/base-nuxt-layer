@@ -1,6 +1,6 @@
 <template>
   <div>
-    <n-button type="primary" @click="() =>{}">Login</n-button>
+    <n-button type="primary" @click="signIn({ login: 'admin', password: 'admin' })">Login</n-button>
     {{ isAuthenticated }}<br>
     {{ user }}
   </div>
