@@ -7,5 +7,5 @@
 </template>
 
 <script setup lang="ts">
-  const { isAuthenticated, user, signIn } = useAuth()
+const { isAuthenticated, user, signIn } = useAuth()
 </script>

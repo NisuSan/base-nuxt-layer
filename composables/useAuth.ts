@@ -1,4 +1,4 @@
-import type { NuxtError } from "#app"
+import type { NuxtError } from '#app'
 
 export function useAuth() {
   const signIn = async (data: Layer.SignIn) => {
@@ -15,10 +15,9 @@ export function useAuth() {
     try {
       userInfo = await api().auth.sessionAsync({})
     } catch (error) {
-      if((error as NuxtError).statusCode === 401) return
+      if ((error as NuxtError).statusCode === 401) return
       throw error
-    }
-    finally {
+    } finally {
       useState('user').value = userInfo
     }
   }

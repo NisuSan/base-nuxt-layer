@@ -1,4 +1,4 @@
-import type { WatchSource } from "vue"
+import type { WatchSource } from 'vue'
 
 type UseNonSSRFetchOptions<T> = {
   query?: Record<string, unknown>
@@ -33,10 +33,10 @@ export function useNonSSRFetch<T = unknown>(
         method: options.method || 'GET',
         headers: options.headers,
         query: options.query,
-        body: options.body
+        body: options.body,
       })
       data.value = options.transform?.(result) ?? result
-    // biome-ignore lint/suspicious/noExplicitAny:
+      // biome-ignore lint/suspicious/noExplicitAny:
     } catch (err: any) {
       error.value = err
     } finally {
@@ -63,6 +63,6 @@ export function useNonSSRFetch<T = unknown>(
     error,
     isFetching,
     execute,
-    refresh: execute
+    refresh: execute,
   }
 }

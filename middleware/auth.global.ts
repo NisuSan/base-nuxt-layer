@@ -1,6 +1,6 @@
 export default defineNuxtRouteMiddleware((to, from) => {
   const { fallbackRoute, unprotectedRoutes, enabled } = useRuntimeConfig().public.baseLayer.auth
-  if(enabled) {
+  if (enabled) {
     const { isAuthenticated } = useAuth()
     const isPublicPage = unprotectedRoutes.some(path => to.path.startsWith(path))
 

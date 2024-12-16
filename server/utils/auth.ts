@@ -98,7 +98,7 @@ export async function useSignup(): Promise<boolean> {
     input.login ??
     cyrillicToTranslit({ preset: 'uk' }).transform(
       // @ts-expect-error profile is inferred from User's type, but in fact it's an object
-      useInitialFromFullName(input.profile,'auth').toLowerCase()
+      useInitialFromFullName(input.profile, 'auth').toLowerCase()
     )
 
   if (
