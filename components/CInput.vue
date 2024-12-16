@@ -82,7 +82,7 @@ onMounted(() => {
       schema = props.required ? schema?.required() : schema?.empty('')
 
       if (typeof props.validation !== 'object') {
-        const joiSetup = useRuntimeConfig().public.joiSetup
+        const joiSetup = useRuntimeConfig().public.baseLayer.joiSetup
         if (joiSetup.locales === 'custom' && Object.keys(joiSetup.messages).length > 0)
           throw new Error('Custom messages for Joi is not defined')
 
