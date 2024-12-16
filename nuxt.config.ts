@@ -3,7 +3,19 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import IconsResolver from 'unplugin-icons/resolver'
-import { localPath } from './utils/index.server'
+import { createLayerConfig, localPath } from './utils/index.server'
+
+const layerOptions = createLayerConfig({
+  auth: {
+    enabled: [false, 'both'],
+    jwtSecret: 'local_value_should_be_overridden_with_env_var_1',
+    jwtExpiresIn: [60 * 60 * 24, 'both'], // 1d
+    unprotectedRoutes: [['auth'], 'both'],
+    signupKind: 'base',
+    fallbackRoute: ['/auth', 'both'],
+    sesionPrivateKey: 'local_value_should_be_overridden_with_env_var_2',
+  },
+})
 
 export default defineNuxtConfig({
   build: {
@@ -40,6 +52,11 @@ export default defineNuxtConfig({
       Icons({ autoInstall: true }),
     ],
   },
+  nitro: {
+    experimental: {
+      asyncContext: true,
+    },
+  },
   tailwindcss: {
     cssPath: ['./assets/tailwind.css', { injectPosition: 'first' }],
     exposeConfig: {
@@ -48,8 +65,12 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
+    baseLayer: layerOptions.baseLayer,
     public: {
-      joiSetup: { locales: 'enEn' },
+      baseLayer: {
+        joiSetup: { locales: 'enEn' },
+        ...layerOptions.publicLayer,
+      },
     },
   },
 })

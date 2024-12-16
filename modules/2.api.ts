@@ -44,7 +44,9 @@ function generateComposables(options: ModuleOptions) {
   const dirsForParse = [
     ...(options.includeFiles || []),
     join(useNuxt().options.rootDir, '/server/api/**/*.ts').replace(/\\/g, '/'),
+    localPath('../server/api/**/*.ts').replace(/\\/g, '/'),
   ]
+
   const customApis = fg.sync(dirsForParse, { dot: true })
 
   if (customApis.length === 0) {
@@ -78,11 +80,13 @@ function generateComposables(options: ModuleOptions) {
         return {
           group,
           method: `
-        ${fnName}<T = '${group}.${parsed.name}'>(params?: Ref<APIParams<T>> | APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
-          // @ts-expect-error
-          return useExtendedFetch<APIOutput<T>>(\`${route}\`, '${parts[1] || 'get'}', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) }) as AsyncData<APIOutput<T>, Error>
-        }
-      `,
+      ${fnName}<T = '${group}.${parsed.name}'>(params: APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
+        return callFetchData<T, 'fetch'>(\`${route}\`, '${parts[1] || 'get'}', 'fetch', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) })
+      },
+      ${fnName}Async<T = '${group}.${parsed.name}'>(params: APIParams<T>, options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { defaultData?: APIOutput<T>, withCache?: boolean | number }) {
+        return callFetchData<T, 'async'>(\`${route}\`, '${parts[1] || 'get'}', 'async', params, {...options, default: dfBuilder('${group}.${parsed.name}', options?.defaultData) })
+      }
+    `,
         }
       })
       // @ts-expect-error avoid checking for undefined because it's failed earlier in case of it
@@ -97,6 +101,8 @@ function generateComposables(options: ModuleOptions) {
     export type APIParams<T> = ${compiledInputTypes};
     export type APIOutput<T> = ${compiledOutputTypes};
     export const defaults = ${compiledDefaults};
+    type APIMode = 'fetch' | 'async'
+    type EndpointReturn<T, M=APIMode> = M extends 'fetch' ? AsyncData<APIOutput<T>, Error> : M extends 'async' ? Promise<APIOutput<T>> : never
 
     const dfBuilder = (n: string, d: unknown) => () => ref(Array.isArray(defaults[n])
       ? d || defaults[n]
@@ -110,29 +116,38 @@ function generateComposables(options: ModuleOptions) {
       }
     }
 
-    export function useExtendedFetch<T>(
+    function callFetchData<T, APIMode>(
       url: string,
       method: string = 'get',
-      params?: Ref<APIParams<T>> | APIParams<T>,
-      options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { default?: () => APIOutput<T>, withCache?: boolean | number }
-    ) {
-      const isHasArray = Object.values(unref(params) || {}).some(value => Array.isArray(value))
-      // @ts-expect-error
-      return useFetch<APIOutput<T>>(url, {
+      mode: APIMode,
+      params?: APIParams<T>,
+      options?: Omit<UseFetchOptions<APIOutput<T>>, 'default' | 'query' | 'body' | 'params'> & { default?: () => APIOutput<T>, withCache?: boolean | number },
+    ): EndpointReturn<T, APIMode> {
+      const isHasArray = Object.values(params || {}).some(value => Array.isArray(value))
+      const optionsInfo = {
         method,
         [['get', 'delete'].includes(method) ? 'query' : 'body']: isHasArray
-          ? Object.fromEntries(Object.entries(unref(params) || {}).map(([k, v]) => [Array.isArray(v) ? \`\${k}[]\` : k, toRaw(v)]))
+          ? Object.fromEntries(Object.entries(params || {}).map(([k, v]) => [Array.isArray(v) ? \`\${k}[]\` : k, toRaw(v)]))
           : params,
         lazy: true,
         getCachedData: options?.withCache === true ? (key: string | number, nuxtApp: { payload: { data: { [x: string]: any; }; }; static: { data: { [x: string]: any; }; }; }) => {
           return nuxtApp.payload.data[key] || nuxtApp.static.data[key]
         } : undefined,
         default: () => [],
-        ...options }
-      )  as AsyncData<APIOutput<T>, Error>
+        ...options
+      }
+
+      return (mode === 'fetch'
+        ? fetchData<APIOutput<T>>(url, optionsInfo)
+        : $fetch(url, optionsInfo)) as EndpointReturn<T, APIMode>
+    }
+
+    function fetchData<T>(url: string, options?: any) {
+      return import.meta.server
+        ? useFetch<T>(url, options)
+        : useNonSSRFetch<T>(url, options)
     }
   `
-
   writeFileSync(localPath('../composables/__api.ts'), composableText)
   return 0
 }
@@ -140,10 +155,8 @@ function generateComposables(options: ModuleOptions) {
 function extractCustomApiTypes(file: string): CustomApiTypes {
   const content = readFileSync(file).toString('utf8')
 
-  const matchArgs = content.match(/type\s?QueryArgs\s?=\s?({[^}]*}|[^{;\n]+)/)
-  const argsType = matchArgs
-    ? matchArgs[1]?.replaceAll('\r\n', '').replaceAll('{', '{ ').replaceAll('}', ' }').replaceAll(/ +/g, ' ')
-    : '{}'
+  const matchArgs = content.match(/EventHandler<[^,]*,\s*([^>]+)>/)
+  const argsType = matchArgs?.[1] || '{}'
 
   const resultType = getResultTypeFromAPI(file) || { t: '{}', defaultValue: '{}' }
   const parsed = parse(file)
@@ -160,16 +173,18 @@ function extractCustomApiTypes(file: string): CustomApiTypes {
 function getResultTypeFromAPI(file: string): { t: string; defaultValue: string } | undefined {
   const sourceFile = tsProject.addSourceFileAtPath(file)
 
-  const arrowFunction = sourceFile
+  const handlerArgs = sourceFile
     .getExportAssignment((exp: ExportAssignment) => {
       const expression = exp.getExpressionIfKind(SyntaxKind.CallExpression)
       if (!expression) return false
 
       const identifier = expression.getExpressionIfKind(SyntaxKind.Identifier)
-      return identifier?.getText() === 'defineEventHandler'
+      return /^define.+Handler$/s.test(identifier?.getText() || '')
     })
     ?.getExpressionIfKind(SyntaxKind.CallExpression)
-    ?.getArguments()[0] as ArrowFunction
+    ?.getArguments()
+
+  const arrowFunction = handlerArgs?.find(x => x.getKind() === SyntaxKind.ArrowFunction) as ArrowFunction | undefined
 
   if (!arrowFunction) return undefined
   const arrowFunctionSourceFile = arrowFunction.getSourceFile()
@@ -206,14 +221,6 @@ function createDefaultvalue(type?: Type): string {
   }
 
   return 'undefined'
-}
-
-function capitalize(word: string) {
-  return word
-    ?.toLowerCase()
-    .split(' ')
-    .map(x => x.charAt(0).toUpperCase() + x.slice(1))
-    .join(' ')
 }
 
 function getUrlRouteFromFile(file: string) {

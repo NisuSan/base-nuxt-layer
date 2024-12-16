@@ -11,18 +11,51 @@ declare global {
     }
     type JoiSetup = { locales: JoiLocales; messages: JoiMessages }
     type ValidationDirective = Reactive<{ errors: { el: HTMLElement; message: string }[]; state: string }>
+    type SignIn = { login: string; password: string }
+    type SignUp = Optionate<
+      { repeatedPasword: string; mail: string } & SignIn & Omit<User, 'id'>,
+      'login' | 'password' | 'repeatedPasword'
+    >
+    type User = {
+      id: number
+      roleId: number
+      privileges: number[]
+      profile: {
+        firstName: string
+        lastName: string
+        middleName: string
+      }[]
+    }
+    type SessionData = { user: User }
   }
+
+  type _ = unknown
+  type Optionate<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 }
 
 declare module '@nuxt/schema' {
-  interface RuntimeConfig {}
-  interface PublicRuntimeConfig {
-    joiSetup: Layer.JoiSetup
+  interface RuntimeConfig {
+    baseLayer: {
+      auth: {
+        enabled: boolean
+        jwtSecret: string
+        jwtExpiresIn: number
+        unprotectedRoutes: string[]
+        signupKind: 'base' | 'extended'
+        fallbackRoute: string
+        sesionPrivateKey: string
+      }
+    }
   }
-}
-
-declare module '@vue/runtime-core' {
-  export interface ComponentCustomProperties {
-    vValidation: Layer.ValidationDirective
+  interface PublicRuntimeConfig {
+    baseLayer: {
+      joiSetup: Layer.JoiSetup
+      auth: {
+        enabled: boolean
+        jwtExpiresIn: number
+        fallbackRoute: string
+        unprotectedRoutes: string[]
+      }
+    }
   }
 }
