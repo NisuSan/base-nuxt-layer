@@ -51,6 +51,7 @@ declare module '@nuxt/schema' {
     baseLayer: {
       joiSetup: Layer.JoiSetup
       auth: {
+        enabled: boolean,
         jwtExpiresIn: number
         fallbackRoute: string
         unprotectedRoutes: string[]
