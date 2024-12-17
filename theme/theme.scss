@@ -1,57 +1,3 @@
-@use "sass:map";
-@use "sass:string";
-
-@function str-split($string, $separator) {
-  $i: string.index($string, $separator);
-  @if $i != null {
-    @return append(
-      string.slice($string, 1, $i - 1),
-      string.split(string.slice($string, $i + string.length($separator)), $separator)
-    );
-  }
-  @return $string;
-}
-
-@function ch($light, $dark) {
-  @return if(var(--current-theme) == 'light', $light, $dark);
-}
-
-@mixin themed($selector: '', $theme: null) {
-  @each $s in string.split($selector, ',') {
-    [theme=#{$theme}] #{$s} {
-      @content;
-    }
-  }
-}
-
-@mixin createTippyTheme($theme, $bgColor, $textColor) {
-  .tippy-box[data-theme~='#{$theme}'] {
-    @apply font-medium;
-    background-color: $bgColor;
-    color: $textColor;
-  }
-
-  .tippy-box[data-theme~='#{$theme}'][data-placement^='top'] > .tippy-arrow::before {
-    border-top-color: $bgColor;
-  }
-
-  .tippy-box[data-theme~='#{$theme}'][data-placement^='bottom'] > .tippy-arrow::before {
-    border-bottom-color: $bgColor;
-  }
-
-  .tippy-box[data-theme~='#{$theme}'][data-placement^='left'] > .tippy-arrow::before {
-    border-left-color: $bgColor;
-  }
-
-  .tippy-box[data-theme~='#{$theme}'][data-placement^='right'] > .tippy-arrow::before {
-    border-right-color: $bgColor;
-  }
-}
-
-// -------------------------------------
-// SASS itself
-// -------------------------------------
-
 html {
   background-color: theme('colors.background') !important;
   color: theme('colors.text') !important;
@@ -136,6 +82,7 @@ $buttons: ('default': 'main-brand', 'primary': 'main-brand', 'info': 'info', 'su
 @each $t in ('light', 'dark') {
   @each $btn, $n in $buttons {
     [theme=#{$t}] .n-button.n-button--#{$btn}-type.n-button--dashed:active {
+
       color: theme('colors.#{$n}-hover') !important;
       background-color: theme('colors.translucent') !important;
 
