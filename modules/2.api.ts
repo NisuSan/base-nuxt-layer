@@ -8,7 +8,13 @@ import { gray, greenBright } from 'ansis'
 import { localPath } from '../utils/index.server'
 
 export interface ModuleOptions {
+  /**Files to be parsed as api endpoints
+   * @default []
+   */
   includeFiles?: string[]
+  /**Name of the composable function
+   * @default 'api'
+   */
   functionName?: string
 }
 
@@ -26,8 +32,8 @@ const tsProject = new Project({ tsConfigFilePath: join(useNuxt().options.rootDir
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: 'apiHelper',
-    configKey: 'apiHelper',
+    name: 'apiGenerator',
+    configKey: 'apiGenerator',
   },
   setup(_options, _nuxt) {
     try {

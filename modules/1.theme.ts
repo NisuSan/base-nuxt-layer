@@ -15,10 +15,8 @@ export default defineNuxtModule<ModuleOptions>({
   setup(_options, _nuxt) {
     try {
       generateComposables()
-      console.log(`${greenBright('✔')} Generate __themes.ts composable`)
-
       generateColorType()
-      console.log(`${greenBright('✔')} Generate Color type`)
+      console.log(`${greenBright('✔')} Generate __themes.ts composable`)
     } catch (e) {
       console.error('themeUtils error:', e)
     }

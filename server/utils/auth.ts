@@ -27,20 +27,23 @@ export async function useSignin(): Promise<Layer.User> {
   if (input.login !== 'admin' || input.password !== 'admin')
     throw createError({ statusCode: 404, message: 'User not found' })
 
-  const user = await usePrisma().user.findUnique({ select: {
-    id: true,
-    hash: true,
-    salt: true,
-    roleId: true,
-    privileges: true,
-    profile: { select: { firstName: true, lastName: true, middleName: true } }
-  }, where: { login: input.login } })
-  if(user === null) throw createError({ statusCode: 404, message: 'User not found' })
+  const user = await usePrisma().user.findUnique({
+    select: {
+      id: true,
+      hash: true,
+      salt: true,
+      roleId: true,
+      privileges: true,
+      profile: { select: { firstName: true, lastName: true, middleName: true } },
+    },
+    where: { login: input.login },
+  })
+  if (user === null) throw createError({ statusCode: 404, message: 'User not found' })
 
   const encryptedHash = pbkdf2Sync(input.password, user.salt, 10000, 512, 'sha512')
-  if(user.hash !== encryptedHash.toString('hex')) throw createError({ statusCode: 404, message: 'User not found' })
+  if (user.hash !== encryptedHash.toString('hex')) throw createError({ statusCode: 404, message: 'User not found' })
 
-  const safeUser = makeSafeUser(user);
+  const safeUser = makeSafeUser(user)
   // const safeUser: Layer.User = {
   //   id: 1,
   //   roleId: 1,

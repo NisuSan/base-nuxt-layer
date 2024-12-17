@@ -20,7 +20,7 @@ export function useNonSSRFetch<T = unknown>(
     return val
   })
 
-  const data = ref<T | null>(options.default ? options.default() : null)
+  const data = ref<T | null>(options.default?.() || null)
   const error = ref<Error | null>(null)
   const isFetching = ref(false)
 
