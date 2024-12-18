@@ -73,14 +73,10 @@ function exposeFolder(folder: string) {
   try {
     cpSync(localPath(`../${folder}`), rootDir(folder), {
       recursive: true,
-      errorOnExist: true,
       force: false,
     })
-    console.log(`${greenBright('✔')} Expose ${folder} folder`)
     return true
   } catch (e) {
-    if (!(e as Error).message.includes('Target already exists')) throw e
-    console.log(grey(`Skipped exposing ${folder} folder as it already exists`))
     return false
   }
 }
@@ -111,9 +107,7 @@ function createDockerFiles(options: ModuleOptions['exposeDocker']) {
       : // @ts-expect-error if the options is not an object it's will be undefined or false and next check just end the execution
         options?.name || 'nuxt-app'
 
-  if (existsSync(rootDir('docker/docker-compose.dev.yml')) || !options || !options.databases.length) {
-    console.log(grey('Skipped creating dev docker compose file as it already exists or exposeDocker is disabled'))
-  } else {
+  if (!existsSync(rootDir('docker/docker-compose.dev.yml')) && typeof options === 'object' && options.databases.length) {
     const file = `
       services:
         ${

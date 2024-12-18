@@ -82,7 +82,6 @@ $buttons: ('default': 'main-brand', 'primary': 'main-brand', 'info': 'info', 'su
 @each $t in ('light', 'dark') {
   @each $btn, $n in $buttons {
     [theme=#{$t}] .n-button.n-button--#{$btn}-type.n-button--dashed:active {
-
       color: theme('colors.#{$n}-hover') !important;
       background-color: theme('colors.translucent') !important;
 
