@@ -107,7 +107,11 @@ function createDockerFiles(options: ModuleOptions['exposeDocker']) {
       : // @ts-expect-error if the options is not an object it's will be undefined or false and next check just end the execution
         options?.name || 'nuxt-app'
 
-  if (!existsSync(rootDir('docker/docker-compose.dev.yml')) && typeof options === 'object' && options.databases.length) {
+  if (
+    !existsSync(rootDir('docker/docker-compose.dev.yml')) &&
+    typeof options === 'object' &&
+    options.databases.length
+  ) {
     const file = `
       services:
         ${

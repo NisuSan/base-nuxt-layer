@@ -43,9 +43,9 @@ export default defineNuxtConfig({
       preprocessorOptions: {
         scss: {
           additionalData: '@use "~/theme/theme.utils.scss" as *;',
-        }
-      }
-    }
+        },
+      },
+    },
   },
   nitro: {
     experimental: {
