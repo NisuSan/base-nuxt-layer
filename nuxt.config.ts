@@ -3,19 +3,7 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import IconsResolver from 'unplugin-icons/resolver'
-import { createLayerConfig, localPath } from './utils/index.server'
-
-const layerOptions = createLayerConfig({
-  auth: {
-    enabled: [false, 'both'],
-    jwtSecret: 'local_value_should_be_overridden_with_env_var_1',
-    jwtExpiresIn: [60 * 60 * 24, 'both'], // 1d
-    unprotectedRoutes: [['auth'], 'both'],
-    signupKind: 'base',
-    fallbackRoute: ['/auth', 'both'],
-    sesionPrivateKey: 'local_value_should_be_overridden_with_env_var_2',
-  },
-})
+import { localPath } from './utils/index.server'
 
 export default defineNuxtConfig({
   build: {
@@ -51,6 +39,13 @@ export default defineNuxtConfig({
       }),
       Icons({ autoInstall: true }),
     ],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: '@use "~/theme/theme.utils.scss" as *;',
+        },
+      },
+    },
   },
   nitro: {
     experimental: {
@@ -65,11 +60,22 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    baseLayer: layerOptions.baseLayer,
+    baseLayer: {
+      auth: {
+        jwtSecret: 'local_value_should_be_overridden_with_env_var_1',
+        signupKind: 'base',
+        sesionPrivateKey: 'local_value_should_be_overridden_with_env_var_2',
+      },
+    },
     public: {
       baseLayer: {
         joiSetup: { locales: 'enEn' },
-        ...layerOptions.publicLayer,
+        auth: {
+          enabled: false,
+          jwtExpiresIn: 60 * 60 * 24, // 1d
+          unprotectedRoutes: ['auth'],
+          fallbackRoute: '/auth',
+        },
       },
     },
   },

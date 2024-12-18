@@ -37,16 +37,13 @@ declare module '@nuxt/schema' {
   interface RuntimeConfig {
     baseLayer: {
       auth: {
-        enabled: boolean
         jwtSecret: string
-        jwtExpiresIn: number
-        unprotectedRoutes: string[]
         signupKind: 'base' | 'extended'
-        fallbackRoute: string
         sesionPrivateKey: string
       }
     }
   }
+
   interface PublicRuntimeConfig {
     baseLayer: {
       joiSetup: Layer.JoiSetup
