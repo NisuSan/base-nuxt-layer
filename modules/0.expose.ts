@@ -1,10 +1,9 @@
-import { defineNuxtModule, useNuxt } from 'nuxt/kit'
+import { defineNuxtModule } from 'nuxt/kit'
 import { cpSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { join } from 'node:path'
 import { greenBright, grey } from 'ansis'
 import boxen from 'boxen'
 import defu from 'defu'
-import { localPath } from '../utils/index.server'
+import { localPath, rootPath } from '../utils/index.server'
 
 export interface ModuleOptions {
   /** Creates a theme folder in the root directory
@@ -71,7 +70,7 @@ export default defineNuxtModule<ModuleOptions>({
 
 function exposeFolder(folder: string) {
   try {
-    cpSync(localPath(`../${folder}`), rootDir(folder), {
+    cpSync(localPath(`../${folder}`), rootPath(folder), {
       recursive: true,
       force: false,
     })
@@ -98,7 +97,7 @@ function createDockerFiles(options: ModuleOptions['exposeDocker']) {
     typeof options === 'object' && options?.name === 'auto'
       ? (() => {
           try {
-            const json = JSON.parse(readFileSync(rootDir('package.json')).toString('utf-8'))
+            const json = JSON.parse(readFileSync(rootPath('package.json')).toString('utf-8'))
             return json.name
           } catch (e) {
             return null
@@ -108,7 +107,7 @@ function createDockerFiles(options: ModuleOptions['exposeDocker']) {
         options?.name || 'nuxt-app'
 
   if (
-    !existsSync(rootDir('docker/docker-compose.dev.yml')) &&
+    !existsSync(rootPath('docker/docker-compose.dev.yml')) &&
     typeof options === 'object' &&
     options.databases.length
   ) {
@@ -171,8 +170,8 @@ function createDockerFiles(options: ModuleOptions['exposeDocker']) {
           driver: bridge
     `.replace(/^\s{0,5}/gm, '')
 
-    mkdirSync(rootDir('docker'), { recursive: true })
-    writeFileSync(rootDir('docker/docker-compose.dev.yml'), file)
+    mkdirSync(rootPath('docker'), { recursive: true })
+    writeFileSync(rootPath('docker/docker-compose.dev.yml'), file)
 
     console.log(`${greenBright('✔')} Generate docker compose for development file`)
     boxAboutScripts([
@@ -213,10 +212,6 @@ function createDockerFiles(options: ModuleOptions['exposeDocker']) {
   }
 }
 
-function rootDir(folder: string) {
-  return join(useNuxt().options.rootDir, `/${folder}`)
-}
-
 function writeEnvFile(text: string, commentTitle?: string) {
   const result: boolean[] = []
   for (const file of ['.env', '.env.example']) {
@@ -229,8 +224,8 @@ function writeEnvFile(text: string, commentTitle?: string) {
         return [key?.replace(/^\s{0,6}/gm, ''), file.includes('.example') ? '' : value] as [string, string]
       })
 
-    if (existsSync(rootDir(file))) {
-      const env = readFileSync(rootDir(file)).toString('utf-8')
+    if (existsSync(rootPath(file))) {
+      const env = readFileSync(rootPath(file)).toString('utf-8')
 
       for (const line of splitedEnvs) {
         if (!env.includes(line[0])) {
@@ -239,11 +234,11 @@ function writeEnvFile(text: string, commentTitle?: string) {
       }
 
       if (data.split('\n').length > 3) {
-        writeFileSync(rootDir(file), env + data)
+        writeFileSync(rootPath(file), env + data)
         result.push(true)
       }
     } else {
-      writeFileSync(rootDir(file), data + splitedEnvs.map(line => `${line[0]}=${line[1]}`).join('\n'))
+      writeFileSync(rootPath(file), data + splitedEnvs.map(line => `${line[0]}=${line[1]}`).join('\n'))
       result.push(true)
     }
   }

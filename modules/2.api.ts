@@ -1,13 +1,13 @@
-import { defineNuxtModule, useNuxt } from 'nuxt/kit'
+import { defineNuxtModule } from 'nuxt/kit'
 import { defu } from 'defu'
 import { Project, SyntaxKind, type ArrowFunction, type Type, type ExportAssignment } from 'ts-morph'
 import fg from 'fast-glob'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { dirname, join, parse } from 'node:path'
+import { dirname, parse } from 'node:path'
 import { gray, greenBright } from 'ansis'
 import xxhash from 'xxhash-wasm'
 import { encode, decode } from '@msgpack/msgpack'
-import { localPath } from '../utils/index.server'
+import { localPath, rootPath } from '../utils/index.server'
 
 export interface ModuleOptions {
   /**Files to be parsed as api endpoints
@@ -56,7 +56,7 @@ export default defineNuxtModule<ModuleOptions>({
 function generateComposables(options: ModuleOptions) {
   const dirsForParse = [
     ...(options.includeFiles || []),
-    join(useNuxt().options.rootDir, '/server/api/**/*.ts').replace(/\\/g, '/'),
+    rootPath('server/api/**/*.ts').replace(/\\/g, '/'),
     localPath('../server/api/**/*.ts').replace(/\\/g, '/'),
   ]
 
@@ -263,7 +263,7 @@ function snakeToCamel(s: string) {
 }
 
 function useCache(data?: Record<string, CacheData>): Record<string, CacheData> {
-  const path = join(useNuxt().options.rootDir, '.output/api_generator/cache.mpack')
+  const path = rootPath('.output/api_generator/cache.mpack')
   const isWrite = data && Object.keys(data).length > 0
   mkdirSync(dirname(path), { recursive: true })
 

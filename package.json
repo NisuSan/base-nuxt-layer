@@ -29,7 +29,6 @@
     "naive-ui": "^2.40.1",
     "nuxt": "3.13.2",
     "prisma": "^6.0.0",
-    "sass-embedded": "^1.81.0",
     "typescript": "^5.7.2",
     "vue": "latest"
   },
@@ -37,7 +36,7 @@
   "dependencies": {
     "@msgpack/msgpack": "3.0.0-beta2",
     "@nuxtjs/google-fonts": "^3.2.0",
-    "@nuxtjs/tailwindcss": "^6.12.2",
+    "@tailwindcss/vite": "4.0.0-beta.8",
     "@vueuse/core": "^12.0.0",
     "ansis": "^3.3.2",
     "cyrillic-to-translit-js": "^3.2.1",
@@ -45,6 +44,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "nuxtjs-naive-ui": "^1.0.2",
+    "tailwindcss": "4.0.0-beta.8",
     "ts-morph": "^24.0.0",
     "unplugin-auto-import": "^0.18.5",
     "unplugin-icons": "^0.21.0",
