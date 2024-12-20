@@ -4,6 +4,7 @@ import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import IconsResolver from 'unplugin-icons/resolver'
 import { localPath } from './utils/index.server'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   build: {
@@ -14,8 +15,9 @@ export default defineNuxtConfig({
         : []),
     ],
   },
+  css: ['./assets/tailwind.css'],
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', 'nuxtjs-naive-ui', 'unplugin-icons/nuxt'],
+  modules: ['nuxtjs-naive-ui', 'unplugin-icons/nuxt', '@nuxtjs/google-fonts'],
   vite: {
     optimizeDeps: {
       include:
@@ -38,6 +40,7 @@ export default defineNuxtConfig({
         resolvers: [NaiveUiResolver(), IconsResolver()],
       }),
       Icons({ autoInstall: true }),
+      tailwindcss(),
     ],
     css: {
       preprocessorOptions: {
@@ -50,13 +53,6 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       asyncContext: true,
-    },
-  },
-  tailwindcss: {
-    cssPath: ['./assets/tailwind.css', { injectPosition: 'first' }],
-    exposeConfig: {
-      level: 4,
-      alias: '#tw',
     },
   },
   runtimeConfig: {
@@ -77,6 +73,12 @@ export default defineNuxtConfig({
           fallbackRoute: '/auth',
         },
       },
+    },
+  },
+  googleFonts: {
+    families: {
+      Inter: [400, 500, 600],
+      'JetBrains Mono': [400, 500, 600],
     },
   },
 })

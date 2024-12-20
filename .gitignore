@@ -7,6 +7,8 @@
 dist
 **/composables/__*.ts
 **/server/db/**/*.json
+tw.colors.css
+
 # Node dependencies
 node_modules
 
