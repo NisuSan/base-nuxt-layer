@@ -37,7 +37,7 @@ html {
 }
 
 @include themed('.n-card', 'light') {
-  box-shadow: var(--color-boxShadow-harder) !important;
+  box-shadow: var(--shadow-harder) !important;
 }
 
 .n-collapse-item__header--active .n-collapse-item__header-main {
@@ -81,7 +81,7 @@ html {
 $buttons: ('default': 'main-brand', 'primary': 'main-brand', 'info': 'info', 'success': 'success', 'warning': 'warning', 'error': 'danger');
 @each $t in ('light', 'dark') {
   @each $btn, $n in $buttons {
-    [theme=#{$t}] .n-button.n-button--#{$btn}-type.n-button--dashed:active {
+    [theme="#{$t}"] .n-button.n-button--#{$btn}-type.n-button--dashed:active {
       color: var(--color-#{$n}-hover) !important;
       background-color: var(--color-translucent) !important;
 
