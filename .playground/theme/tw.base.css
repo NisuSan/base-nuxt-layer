@@ -1,0 +1,6 @@
+@theme {
+  --font-sans: Inter, "JetBrains+Mono", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  --shadow-soft: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  --shadow-harder: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+}

@@ -3,19 +3,8 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import IconsResolver from 'unplugin-icons/resolver'
-import { createLayerConfig, localPath } from './utils/index.server'
-
-const layerOptions = createLayerConfig({
-  auth: {
-    enabled: [false, 'both'],
-    jwtSecret: 'local_value_should_be_overridden_with_env_var_1',
-    jwtExpiresIn: [60 * 60 * 24, 'both'], // 1d
-    unprotectedRoutes: [['auth'], 'both'],
-    signupKind: 'base',
-    fallbackRoute: ['/auth', 'both'],
-    sesionPrivateKey: 'local_value_should_be_overridden_with_env_var_2',
-  },
-})
+import { localPath } from './utils/index.server'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   build: {
@@ -26,8 +15,9 @@ export default defineNuxtConfig({
         : []),
     ],
   },
+  css: ['./assets/tailwind.css'],
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', 'nuxtjs-naive-ui', 'unplugin-icons/nuxt'],
+  modules: ['nuxtjs-naive-ui', 'unplugin-icons/nuxt', '@nuxtjs/google-fonts'],
   vite: {
     optimizeDeps: {
       include:
@@ -50,27 +40,45 @@ export default defineNuxtConfig({
         resolvers: [NaiveUiResolver(), IconsResolver()],
       }),
       Icons({ autoInstall: true }),
+      tailwindcss(),
     ],
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: '@use "~/theme/theme.utils.scss" as *;',
+        },
+      },
+    },
   },
   nitro: {
     experimental: {
       asyncContext: true,
     },
   },
-  tailwindcss: {
-    cssPath: ['./assets/tailwind.css', { injectPosition: 'first' }],
-    exposeConfig: {
-      level: 4,
-      alias: '#tw',
-    },
-  },
   runtimeConfig: {
-    baseLayer: layerOptions.baseLayer,
+    baseLayer: {
+      auth: {
+        jwtSecret: 'local_value_should_be_overridden_with_env_var_1',
+        signupKind: 'base',
+        sesionPrivateKey: 'local_value_should_be_overridden_with_env_var_2',
+      },
+    },
     public: {
       baseLayer: {
         joiSetup: { locales: 'enEn' },
-        ...layerOptions.publicLayer,
+        auth: {
+          enabled: false,
+          jwtExpiresIn: 60 * 60 * 24, // 1d
+          unprotectedRoutes: ['auth'],
+          fallbackRoute: '/auth',
+        },
       },
+    },
+  },
+  googleFonts: {
+    families: {
+      Inter: [400, 500, 600],
+      'JetBrains Mono': [400, 500, 600],
     },
   },
 })

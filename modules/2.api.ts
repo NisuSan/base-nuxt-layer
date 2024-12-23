@@ -1,14 +1,22 @@
-import { defineNuxtModule, useNuxt } from 'nuxt/kit'
+import { defineNuxtModule } from 'nuxt/kit'
 import { defu } from 'defu'
 import { Project, SyntaxKind, type ArrowFunction, type Type, type ExportAssignment } from 'ts-morph'
 import fg from 'fast-glob'
-import { readFileSync, writeFileSync } from 'node:fs'
-import { join, parse } from 'node:path'
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { dirname, parse } from 'node:path'
 import { gray, greenBright } from 'ansis'
-import { localPath } from '../utils/index.server'
+import xxhash from 'xxhash-wasm'
+import { encode, decode } from '@msgpack/msgpack'
+import { localPath, rootPath } from '../utils/index.server'
 
 export interface ModuleOptions {
+  /**Files to be parsed as api endpoints
+   * @default []
+   */
   includeFiles?: string[]
+  /**Name of the composable function
+   * @default 'api'
+   */
   functionName?: string
 }
 
@@ -19,21 +27,26 @@ type CustomApiTypes = {
   result: string
 }
 
+type CacheData = Omit<CustomApiTypes, 'file'> & { hash: number }
+
 const defaultOptions: ModuleOptions = {
   functionName: 'api',
 }
-const tsProject = new Project({ tsConfigFilePath: join(useNuxt().options.rootDir, '/tsconfig.json') })
+
+const CACHE = useCache()
+let hasher: ((input: string, seed?: number) => number) | null = null
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: 'apiHelper',
-    configKey: 'apiHelper',
+    name: 'apiGenerator',
+    configKey: 'apiGenerator',
   },
-  setup(_options, _nuxt) {
+  async setup(_options, _nuxt) {
     try {
       const options = defu(_options, defaultOptions)
-      const res = generateComposables(options)
-      if (res === 0) console.log(`${greenBright('✔')} Generate __api.ts composable`)
+      hasher = (await xxhash()).h32
+
+      generateComposables(options) && console.log(`${greenBright('✔')} Generate __api.ts composable`)
     } catch (e) {
       console.error('apiHelper error:', e)
     }
@@ -43,7 +56,7 @@ export default defineNuxtModule<ModuleOptions>({
 function generateComposables(options: ModuleOptions) {
   const dirsForParse = [
     ...(options.includeFiles || []),
-    join(useNuxt().options.rootDir, '/server/api/**/*.ts').replace(/\\/g, '/'),
+    rootPath('server/api/**/*.ts').replace(/\\/g, '/'),
     localPath('../server/api/**/*.ts').replace(/\\/g, '/'),
   ]
 
@@ -51,7 +64,7 @@ function generateComposables(options: ModuleOptions) {
 
   if (customApis.length === 0) {
     console.log(gray('No APIs found'))
-    return 1
+    return false
   }
 
   const customTypes = customApis.map(x => extractCustomApiTypes(x))
@@ -149,11 +162,23 @@ function generateComposables(options: ModuleOptions) {
     }
   `
   writeFileSync(localPath('../composables/__api.ts'), composableText)
-  return 0
+  useCache(CACHE)
+
+  return true
 }
 
 function extractCustomApiTypes(file: string): CustomApiTypes {
+  if (!hasher) throw new Error('hasher is not initialized')
+
   const content = readFileSync(file).toString('utf8')
+  const _hash = hasher(content)
+
+  if (CACHE[file] && CACHE[file].hash === _hash) {
+    return {
+      file,
+      ...CACHE[file],
+    }
+  }
 
   const matchArgs = content.match(/EventHandler<[^,]*,\s*([^>]+)>/)
   const argsType = matchArgs?.[1] || '{}'
@@ -162,18 +187,22 @@ function extractCustomApiTypes(file: string): CustomApiTypes {
   const parsed = parse(file)
   const group = parsed.dir.split('/').reverse()[0]
 
-  return {
-    file,
+  CACHE[file] = {
+    hash: _hash,
     args: `T extends "${group}.${parsed.name}" ? ${argsType}`,
     defaults: `'${group}.${parsed.name}': ${resultType.defaultValue}`,
     result: `T extends "${group}.${parsed.name}" ? ${resultType.t}`,
   }
+
+  return {
+    file,
+    ...CACHE[file],
+  }
 }
 
 function getResultTypeFromAPI(file: string): { t: string; defaultValue: string } | undefined {
-  const sourceFile = tsProject.addSourceFileAtPath(file)
-
-  const handlerArgs = sourceFile
+  const handlerArgs = new Project()
+    .addSourceFileAtPath(file)
     .getExportAssignment((exp: ExportAssignment) => {
       const expression = exp.getExpressionIfKind(SyntaxKind.CallExpression)
       if (!expression) return false
@@ -231,4 +260,18 @@ function getUrlRouteFromFile(file: string) {
 
 function snakeToCamel(s: string) {
   return s.replace(/(_\w)/g, k => (k[1] || '').toUpperCase())
+}
+
+function useCache(data?: Record<string, CacheData>): Record<string, CacheData> {
+  const path = rootPath('.output/api_generator/cache.mpack')
+  const isWrite = data && Object.keys(data).length > 0
+  mkdirSync(dirname(path), { recursive: true })
+
+  try {
+    if (isWrite) writeFileSync(path, encode(data))
+    return decode(readFileSync(path)) as Record<string, CacheData>
+  } catch (e) {
+    if (isWrite) throw e
+    return {}
+  }
 }
