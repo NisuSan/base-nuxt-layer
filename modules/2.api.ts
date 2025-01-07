@@ -7,7 +7,7 @@ import { dirname, parse } from 'node:path'
 import { gray, greenBright } from 'ansis'
 import xxhash from 'xxhash-wasm'
 import { encode, decode } from '@msgpack/msgpack'
-import { localPath, rootPath } from '../utils/index.server'
+import { localPath, rootPath } from '../utils'
 
 export interface ModuleOptions {
   /**Files to be parsed as api endpoints
@@ -57,7 +57,7 @@ function generateComposables(options: ModuleOptions) {
   const dirsForParse = [
     ...(options.includeFiles || []),
     rootPath('server/api/**/*.ts').replace(/\\/g, '/'),
-    localPath('../server/api/**/*.ts').replace(/\\/g, '/'),
+    localPath('server/api/**/*.ts').replace(/\\/g, '/'),
   ]
 
   const customApis = fg.sync(dirsForParse, { dot: true })
@@ -161,7 +161,7 @@ function generateComposables(options: ModuleOptions) {
         : useNonSSRFetch<T>(url, options)
     }
   `
-  writeFileSync(localPath('../composables/__api.ts'), composableText)
+  writeFileSync(localPath('app/composables/__api.ts'), composableText)
   useCache(CACHE)
 
   return true
