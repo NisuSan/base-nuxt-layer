@@ -65,8 +65,9 @@ The API Generation Module simplifies API calls by generating composables from fi
 
 **Sample API File Content (login.post.ts):**
 ```typescript
-type QueryArgs = { login: string, paaword: string }
-export default defineEventHandler(async (event) => {
+// We specify the generics types and use 2nd type as query/params type for autocomplite/intellisense
+// The first type '_' hides 'undefined' under the hood and uses just for skiping position
+export default defineEventHandler<_, { login: string, paaword: string }>(async (event) => {
   return {
     name: 'User 1',
     role: 'admin',
@@ -78,31 +79,24 @@ export default defineEventHandler(async (event) => {
 **Usage in Vue Component:**
 ```typescript
 const info = api().auth.login({ login, password });
+// info is type AsyncData<{ name: string; role: string; privileges: number[] }, Error>
 //or
-const info = api().auth.signup({ login, password });
-// info is of type AsyncData<{ name: string; role: string; privileges: number[] }, Error>
+const info = api().auth.loginAsync({ login, password });
+// info is type { name: string; role: string; privileges: number[] }
 ```
-
-### useExtendedFetch Composable
-
-The `useExtendedFetch` composable extends Nuxt's native useFetch capabilities with advanced features for API calls.
-
-#### Key Features
-- **Method Selection**: Supports all HTTP methods, adjusting query or body automatically.
-- **Parameter Handling**: Accepts parameters as either Ref or direct values.
-- **Array Parameter Support**: Automatically transforms array parameters into correct format.
-- **Caching**: Optional caching with `withCache` option.
-- **Lazy Loading**: Supports lazy loading by default.
-
-#### Usage Example
-```typescript
-const response = useExtendedFetch('/api/auth/login', 'post', { login, password }, { withCache: true });
-```
+> [!TIP]
+> Use ```async``` if you need to await for response, otherwise use common method(without async)
 
 ### Theme Module
-The theme directory in this Nuxt 3 layer provides a flexible and organized approach for managing themes. It includes two files:
+The theme directory in this Nuxt 3 layer provides a flexible and organized approach for managing themes. It includes next iles:
  - `theme.colors.css`: Defines color variables organized by themes (e.g., light and dark).
- - `theme.scss`: Contains SCSS utilities for working with theme colors.
+ - `theme.utils.scss`: Contains SCSS utilities such a mixins, function, etc.
+ - `tw.base.css`: Contains setup for the tailwind.
+ - `theme.scss`: Contains styles of the theme.
+
+> [!IMPORTANT]
+> In this layer we are using the [Tailwind 4](https://tailwindcss.com/docs/v4-beta).
+> Place your CSS-first configuration to the `tw.base.css` file
 
 #### colors.theme.css
 This file declares CSS variables for each theme, defining colors for elements like backgrounds, text, buttons, and other UI components. Each theme (e.g., *light*, *dark*) is wrapped in a CSS attribute selector:
@@ -124,9 +118,7 @@ This file declares CSS variables for each theme, defining colors for elements li
   /* additional color variables */
 }
 ```
-#### SCSS Utilities (theme.scss)
-Offers SCSS utilities to help apply themes conditionally and structure theme-specific styles.
-
+#### SCSS Utilities (theme.utils.scss)
 - `themed` **Mixin**: Simplifies applying theme-specific styles to a selector.
 
 ```scss
@@ -153,37 +145,8 @@ Offers SCSS utilities to help apply themes conditionally and structure theme-spe
   margin: 3px; // the same value for all themes
 }
 ```
-
-#### Tailwind Configuration:
-The **Tailwind** configuration in this layer is linked to the **theme.colors.css** file, enabling the usage of theme-specific colors directly within Tailwind utility classes. This setup allows dynamic color adjustments based on the active theme (e.g., light or dark mode) by leveraging CSS variables.
-
-**tailwind.config.ts file**
-In the extend section color names are mapped to the CSS variables defined in theme.colors.css:
-
-```javascript
-theme: {
-  extend: {
-    colors: {
-      'background-color': 'var(--background-color)',
-      'text-color': 'var(--text-color)',
-      'main-brand': 'var(--main-brand)',
-      // Add more custom colors as needed
-    },
-  },
-},
-```
-#### How It Works
- - Each color key (e.g., 'background-color', 'text-color') points to a corresponding CSS variable in theme.colors.css.
- - When the theme changes (e.g., from light to dark), the values in **theme.colors.css** adjust automatically, and Tailwind utility classes using these colors (e.g., bg-background-color, text-text-color) will reflect the active theme's colors without manual updates.
-
-#### Usage in Components
-With this setup, you can use Tailwind classes for colors that adapt to the active theme:
-
-```html
-<div class="bg-background-color text-text-color">
-  This div background and text color change based on the active theme.
-</div>
-```
+#### theme.scss
+This file contains styles for the global entities like buttons, inputs, etc. 
 
 #### useTheme Composable
 A composable for managing and toggling themes, specifically designed to integrate with Naive UI for theme-based styling overrides. It offers a flexible setup for controlling themes within a Nuxt 3 application, with built-in support for dark and light modes. 
@@ -210,6 +173,41 @@ Returns:
 const styles = {};
 const { themeUI } = useTheme({ naiveUIStyles: styles });
 </script>
+```
+
+#### useColorChooser Composable
+A utility composable for dynamically choosing colors based on the active theme. Designed to work seamlessly with applications that use multiple themes (e.g., light, dark) and provides a flexible setup for resolving theme-specific colors.
+This composable returns a function that computes the appropriate color based on the current theme.
+
+Parameters:
+The returned function accepts:
+
+ - light (string | Layer.Color): The color to use in the light theme.
+ - dark (string | Layer.Color): The color to use in the dark theme.
+ - <some_theme> (string | Layer.Color): The color to use in the <some_theme>.
+
+Returns:
+A function with the following signature:
+ - (light: Layer.Color, dark: Layer.Color) => ComputedRef<string>
+ - (light: string, dark: Layer.Color) => ComputedRef<string>
+ - (light: Layer.Color, dark: string) => ComputedRef<string>
+ - (light: string, dark: string) => ComputedRef<string>
+ - etc.
+
+```vue
+  <template>
+    <div :style="{ color: textColor.value }">Dynamic Theme Color</div>
+  </template>
+  
+  <script setup lang="ts"> 
+  const chooseColor = useColorChooser();
+  
+  // Example with string values
+  const textColor = chooseColor('#ffffff', '#000000');
+  
+  // Example with Layer.Color values
+  const backgroundColor = chooseColor('placeholder', 'placeholder-disabled');
+  </script>
 ```
 
 #### Creating a New Theme
