@@ -3,7 +3,7 @@ import { cpSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node
 import { greenBright, grey } from 'ansis'
 import boxen from 'boxen'
 import defu from 'defu'
-import { localPath, rootPath } from '../utils/index.server'
+import { localPath, rootPath } from '../utils'
 
 export interface ModuleOptions {
   /** Creates a theme folder in the root directory
@@ -50,7 +50,7 @@ export default defineNuxtModule<ModuleOptions>({
     try {
       const options = defu(_options, defaultOptions)
 
-      if (options.exposeTheme) exposeFolder('theme')
+      if (options.exposeTheme) exposeFolder('app/theme')
       if (options.exposePrisma) {
         exposeFolder('prisma') &&
           boxAboutScripts([
@@ -70,7 +70,7 @@ export default defineNuxtModule<ModuleOptions>({
 
 function exposeFolder(folder: string) {
   try {
-    cpSync(localPath(`../${folder}`), rootPath(folder), {
+    cpSync(localPath(`${folder}`), rootPath(folder), {
       recursive: true,
       force: false,
     })

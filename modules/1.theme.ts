@@ -2,7 +2,7 @@ import { defineNuxtModule } from 'nuxt/kit'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { greenBright } from 'ansis'
 import twColors from 'tailwindcss/colors.js'
-import { localPath, rootPath } from '../utils/index.server'
+import { localPath, rootPath } from '../utils'
 
 export type ModuleOptions = Record<string, unknown>
 
@@ -31,7 +31,7 @@ function generateComposables() {
   const possiblesOverrides = generateCombinations(themes, ['Layer.Color', 'string']).join()
 
   writeFileSync(
-    localPath('../composables/__themes.ts'),
+    localPath('app/composables/__themes.ts'),
     `
     import { useColorMode } from '@vueuse/core'
 
@@ -60,12 +60,12 @@ function generateTwAndColorType() {
   const twNativeColorls = extractColorKeys(twColors)
 
   writeFileSync(
-    localPath('../colors.d.ts'),
+    localPath('app/colors.d.ts'),
     `declare global { namespace Layer { type Color = '${[...themeColors, ...twNativeColorls].join("' | '")}' } } export {}`
   )
 
   writeFileSync(
-    localPath('../assets/tw.colors.css'),
+    localPath('app/assets/tw.colors.css'),
     `@theme { ${themeColors.map(k => [`--color-${k}:var(--${k})`]).join(';')} }`
   )
 }
@@ -148,9 +148,9 @@ function getThemes() {
 }
 
 function parseThemeFiles() {
-  const path = existsSync(rootPath('theme/theme.colors.css'))
-    ? rootPath('theme/theme.colors.css')
-    : localPath('../theme/theme.colors.css')
+  const path = existsSync(rootPath('app/theme/theme.colors.css'))
+    ? rootPath('app/theme/theme.colors.css')
+    : localPath('app/theme/theme.colors.css')
 
   return readFileSync(path, 'utf-8')
 }
