@@ -6,9 +6,9 @@ This Nuxt Layer enhances development efficiency with structured modules, custom 
 
 ## Installation
 
-Setting up this layer is straightforward — simply connect it directly from the Git repository.
+Setting up this layer is straightforward by connecting it directly from the Git repository.
 
-1. **Add the Layer**: In nuxt.config.ts, extend the layer by adding it from GitHub:
+1. **Add the Layer**: Extend the layer in `nuxt.config.ts` by adding it from GitHub:
 
 ```typescript
 // nuxt.config.ts
@@ -19,19 +19,19 @@ export default defineNuxtConfig({
 });
 ```
 
-2. **Install Sass-Embedded**: This is required for the project's styling.
+2. **Install Sass-Embedded**: Required for project styling.
 
-```bash
+```css
 pnpm add -D sass-embedded
 ```
 
-3. **Prepare the Nuxt Layer**: Run the following command to set up the layer in your project.
+3. **Prepare the Nuxt Layer**: Set up the layer with the following command:
 
-```bash
+```css
 nuxt prepare
 ```
 
-4. **Configure app.vue**: Wrap your application in the NaiveUIWrapper component:
+4. **Configure app.vue**: Wrap your application with the `NaiveUIWrapper` component:
 
 ```vue
 <template>
@@ -44,18 +44,19 @@ nuxt prepare
 ## Modules
 
 ### API Generation Module
-The API Generation Module simplifies API calls by generating composables from files in the server/api directory. Instead of using useFetch with string routes, developers can use a generated composable like `api().auth.login({login, password})`. It ensures type safety by using ts-morph to infer input and output types.
 
-**API File Requirements:**
-- All API endpoint files should be in the server/api directory.
-- Filenames should be in snake_case or a single word to represent the HTTP method (e.g., login.post.ts for POST, users.get.ts for GET).
-- Each file should include a QueryArgs type representing the input. If omitted, an empty object `{}` is assumed.
-- The api folder can contain nested folders, and the generated composable will represent them as nested objects.
+The API Generation Module simplifies API calls by automatically generating composables from files in the `server/api` directory. Instead of using `useFetch` with string routes, you can use a generated composable like `api().auth.login({ login, password })`. It ensures type safety through `ts-morph`, which infers input and output types.
 
-### Usage Example
+#### API File Requirements:
+- Place all API endpoint files in the `server/api` directory.
+- Use snake_case or a single word to represent HTTP methods in filenames (e.g., `login.post.ts` for POST, `users.get.ts` for GET).
+- Include a `QueryArgs` type in each file to define input. If omitted, an empty object `{}` is assumed.
+- Nested folders in the `api` directory are supported and will map to nested objects in the generated composable.
+
+#### Usage Example:
 
 **API Directory Structure:**
-```bash
+```css
 /server
  └── /api
       └── /auth
@@ -65,47 +66,95 @@ The API Generation Module simplifies API calls by generating composables from fi
 
 **Sample API File Content (login.post.ts):**
 ```typescript
-type QueryArgs = { login: string, paaword: string }
-export default defineEventHandler(async (event) => {
+export default defineEventHandler<_, { login: string, password: string }>(async (event) => {
   return {
     name: 'User 1',
     role: 'admin',
     privileges: [1, 2, 3, 4, 5, 6],
-  }
-})
+  };
+});
 ```
 
-**Usage in Vue Component:**
+**Usage in a Vue Component:**
 ```typescript
 const info = api().auth.login({ login, password });
-//or
-const info = api().auth.signup({ login, password });
-// info is of type AsyncData<{ name: string; role: string; privileges: number[] }, Error>
+// info is type AsyncData<{ name: string; role: string; privileges: number[] }, Error>
+
+// or
+const info = api().auth.loginAsync({ login, password });
+// info is type { name: string; role: string; privileges: number[] }
 ```
 
-### useExtendedFetch Composable
+> [!TIP]
+>  Use `async` if you need to await the response; otherwise, use the synchronous method.
 
-The `useExtendedFetch` composable extends Nuxt's native useFetch capabilities with advanced features for API calls.
+---
 
-#### Key Features
-- **Method Selection**: Supports all HTTP methods, adjusting query or body automatically.
-- **Parameter Handling**: Accepts parameters as either Ref or direct values.
-- **Array Parameter Support**: Automatically transforms array parameters into correct format.
-- **Caching**: Optional caching with `withCache` option.
-- **Lazy Loading**: Supports lazy loading by default.
+#### useNonSSRFetch Composable
 
-#### Usage Example
-```typescript
-const response = useExtendedFetch('/api/auth/login', 'post', { login, password }, { withCache: true });
+The composable is a utility designed to facilitate client-side-only data fetching. It ensures that fetch operations are executed exclusively in the browser, avoiding potential conflicts with server-side rendering (SSR). This composable supports various configurations, enabling flexibility for dynamic data retrieval through reactive inputs and customizable options.
+
+**Parameters:**
+- `input (string | Ref<string> | () => string)`:  
+  Specifies the endpoint for the fetch request. Accepted formats include:
+  - A static string representing the URL (e.g., `"https://example.com"`).
+  - A reactive `Ref` object containing the URL as its value.
+  - A function that dynamically generates and returns the URL as a string.
+
+- `options (UseNonSSRFetchOptions<T>)`:  
+  An optional configuration object that includes:
+  - `query (Record<string, unknown>)`: An object defining query parameters to append to the URL.
+  - `body (Record<string, unknown> | BodyInit | null)`: The request payload, suitable for methods like `POST` or `PUT`.
+  - `headers (Record<string, string>)`: Custom HTTP headers to include in the request.
+  - `method (string)`: The HTTP method to use (default: `"GET"`).
+  - `transform ((input: unknown) => T`): A function to process and transform the response data before storing it in the `data` property.
+  - `default (() => T)`: A function providing default data to initialize the `data` property while awaiting a response.
+  - `immediate (boolean)`: Determines whether the fetch operation should execute immediately upon initialization (default: `true`).
+  - `watch** (WatchSource<unknown> | WatchSource<unknown>[])`: A reactive dependency or array of dependencies that trigger the fetch operation when they change.
+
+**Returns:**
+An object containing the following reactive properties and methods:
+- `data (Ref<T | null>)`: A reactive reference to the fetched data or the default value.
+- `error (Ref<Error | null>)`: A reactive reference to an error object if the fetch operation fails.
+- `isFetching (Ref<boolean>)`: A reactive boolean indicating whether the fetch operation is currently in progress.
+- `execute (() => Promise<void>)`: A method to manually trigger the fetch operation.
+- `refresh (() => Promise<void>)`: An alias for `execute`, providing semantic clarity for refreshing the data.
+
+```vue
+<template>
+  <div>
+    <p v-if="isFetching">Fetching data...</p>
+    <p v-else-if="error">Error: {{ error.message }}</p>
+    <p v-else>Data: {{ data }}</p>
+    <button @click="refresh">Refresh</button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useNonSSRFetch } from '@/composables';
+
+const { data, error, isFetching, refresh } = useNonSSRFetch('https://api.example.com/data', {
+  method: 'GET',
+  headers: { 'Authorization': 'Bearer token' },
+  transform: (response) => response.items,
+  default: () => [],
+});
+</script>
 ```
 
 ### Theme Module
-The theme directory in this Nuxt 3 layer provides a flexible and organized approach for managing themes. It includes two files:
- - `theme.colors.css`: Defines color variables organized by themes (e.g., light and dark).
- - `theme.scss`: Contains SCSS utilities for working with theme colors.
 
-#### colors.theme.css
-This file declares CSS variables for each theme, defining colors for elements like backgrounds, text, buttons, and other UI components. Each theme (e.g., *light*, *dark*) is wrapped in a CSS attribute selector:
+The theme module provides a flexible, organized approach to managing application themes. It includes the following files:
+- `theme.colors.css`: Defines CSS variables for themes (e.g., light and dark).
+- `theme.utils.scss`: Contains SCSS utilities such as mixins and functions.
+- `tw.base.css`: Configures TailwindCSS.
+- `theme.scss`: Defines global styles for buttons, inputs, and other UI components.
+
+> [!IMPORTANT]
+> Tailwind 4 is using inside the projet
+
+#### CSS Themes (theme.colors.css)
+Define color variables for themes. For example:
 
 ```css
 /* Light Theme */
@@ -113,7 +162,6 @@ This file declares CSS variables for each theme, defining colors for elements li
   --background-color: #ffffff;
   --text-color: #000000;
   --main-brand: #3498db;
-  /* additional color variables */
 }
 
 /* Dark Theme */
@@ -121,83 +169,49 @@ This file declares CSS variables for each theme, defining colors for elements li
   --background-color: #1e1e1e;
   --text-color: #f0f0f0;
   --main-brand: #2980b9;
-  /* additional color variables */
 }
 ```
-#### SCSS Utilities (theme.scss)
-Offers SCSS utilities to help apply themes conditionally and structure theme-specific styles.
 
-- `themed` **Mixin**: Simplifies applying theme-specific styles to a selector.
+#### SCSS Utilities (theme.utils.scss)
+- **`themed` Mixin**: Apply theme-specific styles to selectors.
 
 ```scss
-@mixin themed($selector: '', $theme: null) { }
+@mixin themed($selector, $theme) { }
 
-// Usage Example:
-@include themed('.n-button', 'light') {
+// Example:
+@include themed('.button', 'light') {
   background-color: var(--main-brand);
-}
-
-@include themed('.n-button', 'dark') {
-  background-color: var(--main-brand);
-  font-weight: 600; // also make text bolder in dark theme
 }
 ```
-- `ch` **Function**: A utility for conditional color values based on the active theme.
+
+- **`ch` Function**: Conditional color values based on active themes.
 
 ```scss
-@function ch($light, $dark, ...) { }
+@function ch($light, $dark) { }
 
-// Usage Example:
+// Example:
 .button {
-  color: ch(#000000, #ffffff); // Black in light theme, white in dark theme
-  margin: 3px; // the same value for all themes
+  color: ch(#000000, #ffffff);
 }
 ```
 
-#### Tailwind Configuration:
-The **Tailwind** configuration in this layer is linked to the **theme.colors.css** file, enabling the usage of theme-specific colors directly within Tailwind utility classes. This setup allows dynamic color adjustments based on the active theme (e.g., light or dark mode) by leveraging CSS variables.
-
-**tailwind.config.ts file**
-In the extend section color names are mapped to the CSS variables defined in theme.colors.css:
-
-```javascript
-theme: {
-  extend: {
-    colors: {
-      'background-color': 'var(--background-color)',
-      'text-color': 'var(--text-color)',
-      'main-brand': 'var(--main-brand)',
-      // Add more custom colors as needed
-    },
-  },
-},
-```
-#### How It Works
- - Each color key (e.g., 'background-color', 'text-color') points to a corresponding CSS variable in theme.colors.css.
- - When the theme changes (e.g., from light to dark), the values in **theme.colors.css** adjust automatically, and Tailwind utility classes using these colors (e.g., bg-background-color, text-text-color) will reflect the active theme's colors without manual updates.
-
-#### Usage in Components
-With this setup, you can use Tailwind classes for colors that adapt to the active theme:
-
-```html
-<div class="bg-background-color text-text-color">
-  This div background and text color change based on the active theme.
-</div>
-```
+#### theme.scss
+This file contains global styles for reusable UI components such as buttons, inputs, and other elements.
 
 #### useTheme Composable
-A composable for managing and toggling themes, specifically designed to integrate with Naive UI for theme-based styling overrides. It offers a flexible setup for controlling themes within a Nuxt 3 application, with built-in support for dark and light modes. 
 
-Parameters:
- - `options` (Optional): An object containing:
-   - `naiveUIStyles`: An object of type GlobalThemeOverrides for custom Naive UI style overrides.
+A composable for managing and toggling themes, specifically designed to integrate with Naive UI for theme-based styling overrides. It offers a flexible setup for controlling themes within a Nuxt 3 application, with built-in support for dark and light modes.
 
-Returns:
-- `toggleTheme`: Toggles between light and dark themes
-- `setTheme`: Sets specific theme by name
-- `themeName`: Current theme name
-- `nextThemeName`: Next theme name
-- `themeUI`: Computed object of predefined + custom styles for NaiveUI
+**Parameters:**
+- `options (ptional)`: An object containing:
+  - `naiveUIStyles`: An object of type `GlobalThemeOverrides` for custom Naive UI style overrides.
+
+**Returns:**
+- `toggleTheme`: Toggles between light and dark themes.
+- `setTheme`: Sets a specific theme by name.
+- `themeName`: Current theme name.
+- `nextThemeName`: Next theme name.
+- `themeUI`: Computed object of predefined and custom styles for Naive UI.
 
 ```vue
 <template>
@@ -212,36 +226,117 @@ const { themeUI } = useTheme({ naiveUIStyles: styles });
 </script>
 ```
 
-#### Creating a New Theme
- - **Define Colors**: Add a new theme block in **theme.colors.css** with color variables tailored to your theme.
- - **Update CSS Selectors**: Wrap all color variables within [theme='new-theme-name'].
- - **Use SCSS Utilities**: Leverage **ch** for conditional colors and themed to apply styles based on the theme state.
+---
+
+#### useColorChooser Composable
+
+A utility composable for dynamically selecting colors based on the active theme. Designed to support applications with multiple themes (e.g., light, dark) and provides a reactive way to resolve theme-specific colors.
+
+**Parameters:**
+The returned function accepts:
+- `light (string | Layer.Color)`: The color to use in the light theme.
+- `dark (string | Layer.Color)`: The color to use in the dark theme.
+- `<some_theme> (string | Layer.Color)`: The color to use in a custom theme.
+
+**Returns:**
+A function with the following signature:
+- `(light: Layer.Color, dark: Layer.Color) => ComputedRef<string>`
+- `(light: string, dark: Layer.Color) => ComputedRef<string>`
+- `(light: Layer.Color, dark: string) => ComputedRef<string>`
+- `(light: string, dark: string) => ComputedRef<string>`
+
+```vue
+<template>
+  <div :style="{ color: textColor.value }">Dynamic Theme Color</div>
+</template>
+
+<script setup lang="ts">
+const chooseColor = useColorChooser();
+
+// Example with string values
+const textColor = chooseColor('#ffffff', '#000000');
+
+// Example with Layer.Color values
+const backgroundColor = chooseColor('primary', 'primary-disabled');
+</script>
+```
+
+---
+
+#### colors Utility Function
+
+A utility function to dynamically resolve color values based on either direct color codes (e.g., `#hex`, `rgb(...)`) or CSS custom properties (e.g., `--variable-name`).
+
+**Parameters:**
+- `name`: The name of the color. This can either be:
+  - A valid CSS color value (e.g., `#ffffff`, `rgb(255, 255, 255)`).
+  - A string referring to a CSS custom property (e.g., `primary`, `secondary`).
+
+**Returns:**
+- `string`: The resolved color value as a valid CSS color string. Throws an error if the color is not found.
+
+```typescript
+import { colors } from '@/utils';
+import { Layer } from '@/constants';
+
+// Example 1: Resolving a direct color code
+const whiteColor = colors('#ffffff');
+console.log(whiteColor); // Output: '#ffffff'
+
+// Example 2: Resolving a color from CSS custom properties
+document.documentElement.style.setProperty('--primary', '#505690');
+const primaryColor = colors('primary');
+console.log(primaryColor); // Output: '#505690'
+```
+
+> [!CAUTION]
+> An error is thrown if the color is not found.
+
+---
+
+#### useThemeNames Composable
+
+A simple composable that returns an array of available theme names for the application. Useful for dynamically managing or displaying theme options.
+
+**Returns:**
+- `string[]`: An array of theme names as strings.
+
+```typescript
+const themeNames = useThemeNames();
+
+console.log(themeNames); 
+// Output: ["light", "dark"]
+```
+
+---
 
 ### Icons Engine
-Provides streamlined icon usage with **[Iconify](https://icon-sets.iconify.design/ "Iconify")** and *unplugin-icons*, automatically downloading and importing icons based on usage.
 
-#### Usage Example
+Provides streamlined icon usage with **[Iconify](https://icon-sets.iconify.design/)** and `unplugin-icons`, automatically downloading and importing icons based on usage.
+
 ```vue
 <template>
   <i-mdi-home />
 </template>
 ```
 
-#### Icon naming convention:
-For auto installing and importing *unplugin-icons* requires prefix `i` for every icon name.
-- **mdi-home** becomes `<i-mdi-home />` or `<IMdiHome />`.
-- **fa-solid:star** becomes `<i-fa-solid-star />` or  `<IFaSolidStar />`.
+#### Icon Naming Convention:
+For auto-installing and importing, `unplugin-icons` requires a prefix `i` for every icon name:
+- `mdi-home` becomes `<i-mdi-home />` or `<IMdiHome />`.
+- `fa-solid:star` becomes `<i-fa-solid-star />` or `<IFaSolidStar />`.
 
-## Components
+---
 
-### c-form Component
-Wrapper for organizing input elements and managing validation details.
+### Components
 
-#### Key Features
-- **Validation Feedback**: Exposes `formErrors` and `status` through **v-slot**.
+#### c-form Component
+
+A wrapper for organizing input elements and managing validation details.
+
+**Key Features:**
+- Validation Feedback: Exposes `formErrors` and `status` through `v-slot`.
 - Centralizes error handling and validation state.
 
-#### Usage Example
 ```vue
 <c-form v-slot="{ formErrors, status }">
     <c-input type="string" validation="string-cyrillic"/>
@@ -250,52 +345,48 @@ Wrapper for organizing input elements and managing validation details.
 </c-form>
 ```
 
-### c-input Component
-Versatile input component supporting various types and validation.
+---
 
-#### Supported Types
-- string
-- number
-- checkbox
-- dropdown
-- date
-- datetime
+#### c-input Component
 
-#### Supported Validators
-- string
-- number
-- string-cyrillic
-- string-latin
-- number-positive
-- Custom **[Joi](https://joi.dev/api/ "Joi")** validation rule
+A versatile input component supporting multiple types and validation rules.
 
-#### Usage Example
+**Supported Types:**
+- `string`
+- `number`
+- `checkbox`
+- `dropdown`
+- `date`
+- `datetime`
+
+**Supported Validators:**
+- `string`
+- `number`
+- `string-cyrillic`
+- `string-latin`
+- `number-positive`
+- `Custom` **[Joi](https://joi.dev/api/)** validation rules.
+
 ```vue
 <c-input type="string" validation="string-cyrillic" />
 <c-input type="number" validation="number-positive" />
 <c-input type="date" />
 ```
 
-### NaiveUIWrapper Component
-Serves as a wrapper for the n-config-provider from Naive UI, providing a centralized setup for localization, theme overrides, and dialog management. It also includes a loading spinner for SSR (Server-Side Rendering) that displays until the component is fully loaded.
+---
 
-#### Component Structure
-- **Naive UI Config Provide**r: Wraps the main content in n-config-provider, applying global settings like locale, date locale, and theme overrides.
-- **Dialog Provider**: Uses n-dialog-provider to handle dialogs within this wrapper.
-- **Loader: Displays** a circular loading spinner until the component finishes mounting, suitable for SSR.
+#### NaiveUIWrapper Component
 
-#### Props
-- **locale** (optional): Locale settings for Naive UI, defaulting to **ukUA** for Ukrainian locale.
-- **dateLocale** (optional): Date locale settings for date-related components, also defaulting to **ukUA**.
-- **theme** (optional): Theme overrides for Naive UI components, expected as a `ComputedRef<GlobalThemeOverrides>`. Defaults to themeUI from useTheme.
-- **srrLoadingBarColor** (optional): Color for the loading spinner during SSR, defaulting to `#6067B1`.
+A wrapper for the `n-config-provider` from Naive UI. Provides centralized setup for localization, theme overrides, and dialog management.
 
-#### Usage Example
-In this example, CustomConfigWrapper will display a loading spinner with the specified color until it finishes loading. After loading, it will apply the locale, date locale, and theme overrides to its children.
+**Props:**
+- `locale (optional)`: Locale settings, defaulting to `ukUA`.
+- `dateLocale (optional)`: Date locale settings, defaulting to `ukUA`.
+- `theme (optional)`: Theme overrides, defaulting to the theme from `useTheme`.
+- `ssrLoadingBarColor (optional)`: Color for the SSR loading spinner, defaulting to `#6067B1`.
+
 ```vue
-<NaiveUIWrapper :locale="locale" :date-locale="dateLocale" :theme="customTheme" :srrLoadingBarColor="'#FF5733'">
+<NaiveUIWrapper :locale="locale" :date-locale="dateLocale" :theme="customTheme" :ssrLoadingBarColor="'#FF5733'">
   <YourComponent />
 </NaiveUIWrapper>
 ```
-
-### See example in .playground folder for more details
