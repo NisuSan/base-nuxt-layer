@@ -2,7 +2,29 @@
 [![E2E Tests](https://github.com/NisuSan/base-nuxt-layer/actions/workflows/e2e.js.yml/badge.svg)](https://github.com/NisuSan/base-nuxt-layer/actions/workflows/e2e.js.yml)
 [![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://github.com/NisuSan/base-nuxt-layer/actions/workflows/code_quality.js.yml)
 
-This Nuxt Layer enhances development efficiency with structured modules, custom components, shared utilities, and themes. The setup includes an API generation module, a comprehensive theme system, an icons engine, and custom form components to streamline your project.
+The **Base Nuxt Layer** is a foundational setup designed to enhance development efficiency for Nuxt.js applications. It provides a structured architecture, pre-configured modules, and utilities to streamline common development tasks, making it easier to focus on building features rather than setting up boilerplate code.
+
+## Key Features
+
+- **Modular Design**: Includes pre-built modules for API generation, theme management, and icons integration.
+- **Custom Components**: Provides reusable components like `c-form` and `c-input` with built-in validation.
+- **Theme System**: Supports light and dark themes with customizable styles via SCSS and Tailwind CSS.
+- **API Generation**: Automates the creation of composables for server-side endpoints, ensuring type-safe API calls.
+- **Icons Engine**: Simplifies icon usage with Iconify and `unplugin-icons` for dynamic imports.
+- **Testing Ready**: Integrated with Cypress for end-to-end testing.
+
+## Ideal Use Cases
+
+This layer is best suited for developers who:
+
+- Want a robust starting point for Nuxt.js projects.
+- Need type-safe and automated API integration.
+- Require consistent theming across light and dark modes.
+- Seek a pre-configured testing environment.
+- Prefer modular and scalable project setups.
+
+By leveraging this base layer, developers can save time and reduce the complexity of initial project setup, focusing on delivering high-quality features efficiently.
+
 
 ## Installation
 
@@ -308,7 +330,165 @@ console.log(themeNames);
 // Output: ["light", "dark"]
 ```
 
----
+### Auth Module
+
+Provides a comprehensive solution for managing authentication in the application. It includes client-side utilities, server-side middleware, and API endpoints to handle common authentication tasks such as login, signup, signout, and session validation.
+
+## Components and Files
+
+#### `/app/pages/auth.vue`
+This page handles the user interface for authentication, such as login and signup forms. It is the primary entry point for user interactions related to authentication.
+
+- **Key Features**:
+  - Displays forms for user login and signup.
+  - Validates user input before submission.
+  - Integrates with the `useAuth` composable for API calls.
+
+#### `/app/composables/useAuth.ts`
+A composable that manages authentication logic on the client side, providing reactive methods and properties for seamless integration into components.
+
+- **Key Features**:
+  - `login(credentials: Layer.SignIn)`: Handles user login and manages session storage.
+  - `signup(userInfo: Layer.SignUp)`: Calls the signup API to create a new user.
+  - `logout()`: Clears user session and redirects to the login page.
+  - Reactive properties like `isAuthenticated` and `user` for tracking authentication state.
+
+#### `/app/middleware/auth.global.ts`
+A global middleware file that ensures authentication is enforced for protected routes.
+
+- **Key Features**:
+  - Redirects unauthenticated users to the login page.
+  - Validates the user session before allowing access to protected pages.
+
+#### `/server/api/auth/signup.post.ts`
+An API endpoint for user signup, designed to handle new user registration.
+
+- **Key Features**:
+  - Accepts a `POST` request with `Layer.SignUp` payload.
+  - Validates input and stores hashed passwords in the database.
+  - Returns a success message or an error response.
+
+```typescript
+const result = await api().auth.signupAsync({
+  login: 'john',
+  password: 'securepassword',
+  repeatedPassword: 'securepassword',
+  mail: 'john@example.com'
+});
+```
+
+#### `/server/api/auth/signin.post.ts`
+An API endpoint for user login, designed to authenticate existing users.
+
+- **Key Features**:
+  - Accepts a `POST` request with `Layer.SignIn` payload.
+  - Validates user credentials and returns a session token on success.
+
+```typescript
+fetch('/api/auth/signin', {
+  method: 'POST',
+  body: JSON.stringify({ login: 'john', password: 'securepassword' }),
+});
+```
+
+#### `/server/api/auth/signout.post.ts`
+An API endpoint for user logout, designed to invalidate user sessions.
+
+- **Key Features**:
+  - Accepts a `POST` request to log out the user.
+  - Clears session tokens and returns a confirmation message.
+
+```typescript
+fetch('/api/auth/signout', {
+  method: 'POST',
+});
+```
+
+#### `/server/api/auth/session.get.ts`
+An API endpoint for validating user sessions.
+
+- **Key Features**:
+  - Accepts a `GET` request to check the validity of a session token.
+  - Returns user information if the session is valid.
+
+- **Example Request**:
+  ```typescript
+  fetch('/api/auth/session', {
+    method: 'GET',
+    headers: { Authorization: 'Bearer <token>' },
+  });
+  ```
+
+#### `/server/middleware/authServer.ts`
+Server-side middleware for validating user sessions and handling authentication logic.
+
+- **Key Features**:
+  - Checks for valid session tokens in incoming requests.
+  - Attaches user information to the request object for use in downstream handlers.
+  - Returns a `401 Unauthorized` response if the session is invalid.
+
+#### `/server/utils/auth.ts`
+Utility functions for server-side authentication tasks, such as token generation and validation.
+
+- **Key Functions**:
+  - `generateToken(user: Layer.User)`: Creates a secure token for the user session.
+  - `validateToken(token: string)`: Verifies the authenticity and validity of a session token.
+  - `hashPassword(password: string)`: Hashes passwords for secure storage.
+  - `comparePasswords(inputPassword: string, hashedPassword: string)`: Compares user input with the stored hash.
+
+## Workflow
+
+1. **Signup**:
+   - User fills out the signup form in `/app/pages/auth.vue`.
+   - The `signup` method in `useAuth` sends a `POST` request to `/server/api/auth/signup.post.ts`.
+   - The API endpoint validates the input, hashes the password, and stores user data.
+
+2. **Login**:
+   - User enters credentials on the login form.
+   - The `login` method in `useAuth` sends a request to `/server/api/auth/signin.post.ts`.
+   - On success, a token is stored in the client session.
+
+3. **Signout**:
+   - The `logout` method in `useAuth` sends a request to `/server/api/auth/signout.post.ts`.
+   - The session token is invalidated.
+
+4. **Protected Routes**:
+   - `auth.global.ts` middleware ensures the user is authenticated before accessing protected pages.
+   - `authServer.ts` middleware validates session tokens on server-side requests.
+
+5. **Session Validation**:
+   - The client or server can call `/server/api/auth/session.get.ts` to validate the session and retrieve user details.
+
+## Usage Example
+
+**Client-side Login**:
+```typescript
+import { useAuth } from '@/composables/useAuth';
+
+const { login, isAuthenticated, user } = useAuth();
+
+await login({ login: 'john', password: 'password123' });
+
+if (isAuthenticated.value) {
+  console.log(`Welcome, ${user.value.name}`);
+}
+```
+
+**Server-side Token Validation**:
+```typescript
+import { validateToken } from '@/server/utils/auth';
+
+export default defineEventHandler(async (event) => {
+  const token = event.req.headers['authorization'];
+
+  if (!validateToken(token)) {
+    throw createError({ statusCode: 401, message: 'Unauthorized' });
+  }
+
+  // Proceed with authenticated request
+});
+```
+
 
 ### Icons Engine
 
