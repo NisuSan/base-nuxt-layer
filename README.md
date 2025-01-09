@@ -6,12 +6,13 @@ The **Base Nuxt Layer** is a foundational setup designed to enhance development 
 
 ## Key Features
 
-- **Modular Design**: Includes pre-built modules for API generation, theme management, and icons integration.
+- **Modular Design**: Includes pre-built modules for API generation, theme management icons integration and so on.
 - **Custom Components**: Provides reusable components like `c-form` and `c-input` with built-in validation.
 - **Theme System**: Supports light and dark themes with customizable styles via SCSS and Tailwind CSS.
 - **API Generation**: Automates the creation of composables for server-side endpoints, ensuring type-safe API calls.
+- **Pisma ORM**: Ready to use Prisma setup with predefined User related tables.
+- **Docker**: Ready to use setup for local databases like `pgsql` and `mysql`.
 - **Icons Engine**: Simplifies icon usage with Iconify and `unplugin-icons` for dynamic imports.
-- **Testing Ready**: Integrated with Cypress for end-to-end testing.
 
 ## Ideal Use Cases
 
@@ -64,6 +65,49 @@ nuxt prepare
 ```
 
 ## Modules
+
+### Expose Module
+
+It serves as a utility to generate and expose predefined folders, files, and configurations for seamless project setup. This module provides options to create a consistent environment by exposing theme, Prisma, and Docker configurations based on project requirements.\
+The module dynamically generates:
+ - Theme-related folders and files.
+ - Prisma configurations.
+ - Docker setup for development.
+
+#### Module Options
+The following options can be configured in the `baseLayerExpose: Recprd<string, unknown>` module:
+ - `exposeTheme: boolean`: creates a `theme` folder in the root directory, containing predefined theme configurations. Default: `true`
+ - `exposePrisma: boolean`: creates a `prisma` folder in the root directory, including a base schema and necessary configuration files. Default: `false`
+ - `exposeDocker: object | boolean`: creates a `docker` folder in the root directory for development purposes. Default: `false`.  Accepts the following sub-options:
+   - `name`: Specifies the name of the Docker container. Default is `'auto'`.
+   - `databases`: Configures supported database services (e.g., PostgreSQL, MySQL). Default is `['pgsql', 'mysql']`.
+   - `writeEnv`: Writes necessary environment variables to `.env` and `.env.example` files. Default is `true`.
+
+#### Example Configuration
+Below is an example of how to configure the module in `nuxt.config.ts`:
+
+```typescript
+export default defineNuxtConfig({
+  baseLayerExpose: {
+    exposeTheme: true,
+    exposePrisma: true,
+    exposeDocker: {
+      name: 'my-app-container',
+      databases: ['pgsql'],
+      writeEnv: true,
+    },
+  },
+});
+```
+
+#### Generated Outputs
+The module generates the following outputs based on the configuration:
+ - `app/theme/`: theme configuration files for managing application styles.
+ - `prisma/`: base schema for Prisma, seed and instance files for database initialization and shared client usage.
+ - `docker/`: `Dockerfile`, `docker-compose.yml`, `.env` and `.env.example`
+
+> [!NOTE]
+> We will examine each of the mentioned options in detail in the following paragraphs. 
 
 ### API Generation Module
 
@@ -334,122 +378,78 @@ console.log(themeNames);
 
 Provides a comprehensive solution for managing authentication in the application. It includes client-side utilities, server-side middleware, and API endpoints to handle common authentication tasks such as login, signup, signout, and session validation.
 
-## Components and Files
+#### Components and Files
 
-#### `/app/pages/auth.vue`
-This page handles the user interface for authentication, such as login and signup forms. It is the primary entry point for user interactions related to authentication.
+ - `/app/pages/auth.vue`: handles the user interface for authentication, such as login and signup forms. It is the primary entry point for user interactions related to authentication.
+   - Displays forms for user login and signup.
+   - Validates user input before submission.
+   - Integrates with the `useAuth` composable for API calls.
 
-- **Key Features**:
-  - Displays forms for user login and signup.
-  - Validates user input before submission.
-  - Integrates with the `useAuth` composable for API calls.
+ - `/app/composables/useAuth.ts`: manages authentication logic on the client side, providing reactive methods and properties for seamless integration into components.
+   - `login(credentials: Layer.SignIn)`: Handles user login and manages session storage.
+   - `signup(userInfo: Layer.SignUp)`: Calls the signup API to create a new user.
+   - `logout()`: Clears user session and redirects to the login page.
+   - Reactive properties like `isAuthenticated` and `user` for tracking authentication state.
 
-#### `/app/composables/useAuth.ts`
-A composable that manages authentication logic on the client side, providing reactive methods and properties for seamless integration into components.
+ - `/app/middleware/auth.global.ts`: a global middleware file that ensures authentication is enforced for protected routes.
+   - Redirects unauthenticated users to the login page.
+   - Validates the user session before allowing access to protected pages.
 
-- **Key Features**:
-  - `login(credentials: Layer.SignIn)`: Handles user login and manages session storage.
-  - `signup(userInfo: Layer.SignUp)`: Calls the signup API to create a new user.
-  - `logout()`: Clears user session and redirects to the login page.
-  - Reactive properties like `isAuthenticated` and `user` for tracking authentication state.
+ - `/server/api/auth/signup.post.ts`: an API endpoint for user signup, designed to handle new user registration.
+   - Accepts a `POST` request with `Layer.SignUp` payload.
+   - Validates input and stores hashed passwords in the database.
+   - Returns a success message or an error response.
 
-#### `/app/middleware/auth.global.ts`
-A global middleware file that ensures authentication is enforced for protected routes.
+ - `/server/api/auth/signin.post.ts`: an API endpoint for user login, designed to authenticate existing users.
+   - Accepts a `POST` request with `Layer.SignIn` payload.
+   - Validates user credentials and returns a session token on success.
 
-- **Key Features**:
-  - Redirects unauthenticated users to the login page.
-  - Validates the user session before allowing access to protected pages.
+ - `/server/api/auth/signout.post.ts`: an API endpoint for user logout, designed to invalidate user sessions.
+   - Accepts a `POST` request to log out the user.
+   - Clears session tokens and returns a confirmation message.
 
-#### `/server/api/auth/signup.post.ts`
-An API endpoint for user signup, designed to handle new user registration.
+ - `/server/api/auth/session.get.ts`: an API endpoint for validating user sessions.
+   - Accepts a `GET` request to check the validity of a session token.
+   - Returns user information if the session is valid.
 
-- **Key Features**:
-  - Accepts a `POST` request with `Layer.SignUp` payload.
-  - Validates input and stores hashed passwords in the database.
-  - Returns a success message or an error response.
+ - `/server/middleware/authServer.ts`: server-side middleware for validating user sessions and handling authentication logic.
+   - Checks for valid session tokens in incoming requests.
+   - Attaches user information to the request object for use in downstream handlers.
+   - Returns a `401 Unauthorized` response if the session is invalid.
 
-```typescript
-const result = await api().auth.signupAsync({
-  login: 'john',
-  password: 'securepassword',
-  repeatedPassword: 'securepassword',
-  mail: 'john@example.com'
-});
-```
+ - `/server/utils/auth.ts`: utility functions for server-side authentication tasks, such as token generation and validation.
+   - `generateToken(user: Layer.User)`: Creates a secure token for the user session.
+   - `validateToken(token: string)`: Verifies the authenticity and validity of a session token.
+   - `hashPassword(password: string)`: Hashes passwords for secure storage.
+   - `comparePasswords(inputPassword: string, hashedPassword: string)`: Compares user input with the stored hash.
 
-#### `/server/api/auth/signin.post.ts`
-An API endpoint for user login, designed to authenticate existing users.
+#### Nuxt Config Options
 
-- **Key Features**:
-  - Accepts a `POST` request with `Layer.SignIn` payload.
-  - Validates user credentials and returns a session token on success.
+ - `runtimeConfig.baseLayer.auth`: private runtime configuration for authentication, intended for server-side use only.
+   - `jwtSecret`: A secret key for signing JWTs. Default: `'local_value_should_be_overridden_with_env_var_1'`.
+   - `signupKind`: Defines the signup behavior or strategy. Default: `'base'`.
+   - `sesionPrivateKey`: A private key for session encryption. Default: `'local_value_should_be_overridden_with_env_var_2'`.
 
-```typescript
-fetch('/api/auth/signin', {
-  method: 'POST',
-  body: JSON.stringify({ login: 'john', password: 'securepassword' }),
-});
-```
+ - `runtimeConfig.public.baseLayer.auth`: public runtime configuration for authentication, accessible on both client and server.
+   - `enabled`: Enables or disables authentication. Default: `false`.
+   - `jwtExpiresIn`: Expiration time for JWTs (in seconds). Default: `60 * 60 * 24` (1 day).
+   - `unprotectedRoutes`: A list of routes that bypass authentication. Default: `['auth']`.
+   - `fallbackRoute`: The route to redirect unauthenticated users. Default: `'/auth'`.
 
-#### `/server/api/auth/signout.post.ts`
-An API endpoint for user logout, designed to invalidate user sessions.
-
-- **Key Features**:
-  - Accepts a `POST` request to log out the user.
-  - Clears session tokens and returns a confirmation message.
-
-```typescript
-fetch('/api/auth/signout', {
-  method: 'POST',
-});
-```
-
-#### `/server/api/auth/session.get.ts`
-An API endpoint for validating user sessions.
-
-- **Key Features**:
-  - Accepts a `GET` request to check the validity of a session token.
-  - Returns user information if the session is valid.
-
-- **Example Request**:
-  ```typescript
-  fetch('/api/auth/session', {
-    method: 'GET',
-    headers: { Authorization: 'Bearer <token>' },
-  });
-  ```
-
-#### `/server/middleware/authServer.ts`
-Server-side middleware for validating user sessions and handling authentication logic.
-
-- **Key Features**:
-  - Checks for valid session tokens in incoming requests.
-  - Attaches user information to the request object for use in downstream handlers.
-  - Returns a `401 Unauthorized` response if the session is invalid.
-
-#### `/server/utils/auth.ts`
-Utility functions for server-side authentication tasks, such as token generation and validation.
-
-- **Key Functions**:
-  - `generateToken(user: Layer.User)`: Creates a secure token for the user session.
-  - `validateToken(token: string)`: Verifies the authenticity and validity of a session token.
-  - `hashPassword(password: string)`: Hashes passwords for secure storage.
-  - `comparePasswords(inputPassword: string, hashedPassword: string)`: Compares user input with the stored hash.
-
-## Workflow
+#### Workflow
 
 1. **Signup**:
    - User fills out the signup form in `/app/pages/auth.vue`.
-   - The `signup` method in `useAuth` sends a `POST` request to `/server/api/auth/signup.post.ts`.
+   - The `signUp` method in `useAuth` sends a `POST` request to `/server/api/auth/signup.post.ts`.
    - The API endpoint validates the input, hashes the password, and stores user data.
 
-2. **Login**:
+2. **Signin**:
    - User enters credentials on the login form.
-   - The `login` method in `useAuth` sends a request to `/server/api/auth/signin.post.ts`.
+   - The `signIn` method in `useAuth` sends a request to `/server/api/auth/signin.post.ts`.
    - On success, a token is stored in the client session.
 
 3. **Signout**:
-   - The `logout` method in `useAuth` sends a request to `/server/api/auth/signout.post.ts`.
+   - The `signOut` method in `useAuth` sends a request to `/server/api/auth/signout.post.ts`.
    - The session token is invalidated.
 
 4. **Protected Routes**:
@@ -459,36 +459,18 @@ Utility functions for server-side authentication tasks, such as token generation
 5. **Session Validation**:
    - The client or server can call `/server/api/auth/session.get.ts` to validate the session and retrieve user details.
 
-## Usage Example
-
-**Client-side Login**:
+**Example**
 ```typescript
-import { useAuth } from '@/composables/useAuth';
+const { signIn, isAuthenticated, user } = useAuth();
 
-const { login, isAuthenticated, user } = useAuth();
-
-await login({ login: 'john', password: 'password123' });
+await signIn({ login: 'john', password: 'password123' });
 
 if (isAuthenticated.value) {
   console.log(`Welcome, ${user.value.name}`);
 }
 ```
 
-**Server-side Token Validation**:
-```typescript
-import { validateToken } from '@/server/utils/auth';
-
-export default defineEventHandler(async (event) => {
-  const token = event.req.headers['authorization'];
-
-  if (!validateToken(token)) {
-    throw createError({ statusCode: 401, message: 'Unauthorized' });
-  }
-
-  // Proceed with authenticated request
-});
-```
-
+## Features
 
 ### Icons Engine
 
@@ -504,8 +486,6 @@ Provides streamlined icon usage with **[Iconify](https://icon-sets.iconify.desig
 For auto-installing and importing, `unplugin-icons` requires a prefix `i` for every icon name:
 - `mdi-home` becomes `<i-mdi-home />` or `<IMdiHome />`.
 - `fa-solid:star` becomes `<i-fa-solid-star />` or `<IFaSolidStar />`.
-
----
 
 ### Components
 
@@ -570,3 +550,133 @@ A wrapper for the `n-config-provider` from Naive UI. Provides centralized setup 
   <YourComponent />
 </NaiveUIWrapper>
 ```
+
+### Helper Composables
+
+#### useControlTabs
+
+It simplifies the management of tab-based navigation within a Nuxt application. It enables reactive tab states synchronized with the route query parameters and provides utility methods for tab-related logic.
+
+**Parameters**
+
+ - `defaultTab: string`: Specifies the default tab to activate if no `tab` query parameter is present.
+ - `executableFunction: Record<string, () => void> (optional)`: a record of tab names mapped to callback functions. The corresponding function is executed when its tab becomes active.
+
+**Returns**
+
+- `activeTab: Ref<string>`: a reactive reference representing the currently active tab. The value is synchronized with the `tab` query parameter in the URL.
+- `onTabChange: () => void`: updates the route query to reflect the current `activeTab` value. Executes the corresponding function from `executableFunction` if defined.
+- `whenQuery: (val: string) => boolean`: checks if the current `tab` query parameter matches the given value.
+- `whenParam: (val: string) => boolean`: checks if the current `tab` in the route parameters matches the given value.
+
+```typescript
+import { useControlTabs } from '@/composables/useControlTabs';
+
+const tabActions = {
+  home: () => console.log('Home tab activated'),
+  settings: () => console.log('Settings tab activated'),
+  profile: () => console.log('Profile tab activated'),
+};
+
+const { activeTab, onTabChange } = useControlTabs('home', tabActions);
+
+onMounted(() => {
+  onTabChange(); // Executes the action for the default or current tab
+});
+```
+
+> [!IMPORTANT]
+> This composable heavily relies on Vue Router's `useRouter` and `useRoute`.\
+> Ensure that your routes include a `tab` query parameter to fully utilize this composable.
+
+### Prisma
+
+It serves as the primary ORM (Object-Relational Mapping) tool, enabling efficient interaction with the database. The schema is defined in the `prisma` folder and managed through the Prisma CLI.\
+Prisma simplifies database management by:
+ - Providing a strongly-typed API for database queries.
+ - Automatically generating TypeScript types based on the schema.
+ - Supporting migrations to evolve the database schema over time.
+
+#### Files in the `prisma` Folder:
+ - `schema.prisma`: the main configuration file where the database schema is defined. Specifies the data models, relationships, and database provider.
+   - `Datasource`: Configures the database provider (e.g., PostgreSQL) and connection URL.
+   - `Generator`: Specifies the generation of the Prisma Client.
+   - `Models`: Define the entities and their fields, including relationships and constraints.
+ 
+ - `instance.ts`: contains a shared instance of the Prisma Client to be reused throughout the application.
+   - Prevents multiple Prisma Client instances from being created.
+   - Use this instance wherever Prisma Client operations are needed to ensure a single database connection pool.
+
+ - `seed.ts`: the script for populating the database with initial or test data; useful for setting up the development environment or creating demo data.
+
+#### Workflow
+
+1. Define the Schema
+Edit `schema.prisma` to define or update your data models. Use Prisma’s rich data modeling capabilities to define relationships, constraints, and indexes.
+
+2. Apply Migrations
+Use the Prisma CLI to create and apply migrations that synchronize the database with your schema:
+
+```bash
+pnpx prisma migrate dev --name <migration_name>
+```
+
+3. Generate the Prisma Client
+Run the following command to generate the TypeScript client:
+
+```bash
+pnpx prisma generate
+```
+
+4. Query the Database
+Use the Prisma Client to perform database operations in a type-safe manner.
+
+```typescript
+async function main() {
+  const user = await usePrisma().user.create({
+    data: { email: 'john.doe@example.com', name: 'John Doe' },
+  });
+  console.log(user);
+}
+```
+
+#### NPM Scripts
+The following npm scripts related to Prisma are defined in `package.json`:
+ - `prisma-generate`: generates the Prisma Client based on the `schema.prisma` file.
+ - `prisma-migrate-dev`: creates a new migration and applies it to the development database.
+ - `prisma-seed`: executes the seed script located in `prisma/seed.ts` to populate the database with initial data.
+
+> [!IMPORTANT]
+> Ensure the `DATABASE_URL` in the `.env` file is correctly configured for the database connection.\
+> Regularly run `prisma generate` to keep the client up-to-date with schema changes.\
+> Use Prisma migrations to manage schema evolution systematically.
+
+### Docker
+
+The **Dockerfile** for this project is dynamically generated by the `expose` module. It provides a robust containerized environment tailored for development purposes, supporting both application and database configurations.\
+The `exposeDocker` option in the `baseLayerExpose` module enables the following capabilities:
+
+ - `Docker Folder Creation`: when enabled, the `exposeDocker` option generates a Docker setup within the project directory, including Docker-related files such as `Dockerfile` and `docker-compose.yml`. This setup is optimized for development.
+ - `Configuration Options`: 
+   - `name`: specifies the name of the Docker container. Default: `'auto'` - set name from `package.json`.
+   - `databases`: configures database services to be included in the Docker setup. Default: `['pgsql', 'mysql']`.
+   - `writeEnv`: writes necessary environment variables to `.env` and `.env.example` files. Default: `true`.
+
+### Example Configuration in `nuxt.config.ts`
+
+```typescript
+export default defineNuxtConfig({
+  baseLayerExpose: {
+    exposeDocker: {
+      name: 'my-app-container',
+      databases: ['pgsql'],
+      writeEnv: true,
+    },
+  },
+});
+```
+
+> [!NOTE]
+> The generated setup is intended for development use.\
+> Modify the `docker-compose.yml` file to add custom configurations as needed.\
+> Ensure the `.env` file contains valid database credentials if database services are enabled.\
