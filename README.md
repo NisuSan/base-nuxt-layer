@@ -7,15 +7,14 @@ The **Base Nuxt Layer** is a foundational setup designed to enhance development 
 ## Key Features
 
 - **Modular Design**: Includes pre-built modules for API generation, theme management icons integration and so on.
-- **Custom Components**: Provides reusable components like `c-form` and `c-input` with built-in validation.
 - **Theme System**: Supports light and dark themes with customizable styles via SCSS and Tailwind CSS.
 - **API Generation**: Automates the creation of composables for server-side endpoints, ensuring type-safe API calls.
 - **Pisma ORM**: Ready to use Prisma setup with predefined User related tables.
 - **Docker**: Ready to use setup for local databases like `pgsql` and `mysql`.
 - **Icons Engine**: Simplifies icon usage with Iconify and `unplugin-icons` for dynamic imports.
+- **Components and Composables**: Provides reusable components and handy composables.
 
-## Ideal Use Cases
-
+## Use Cases
 This layer is best suited for developers who:
 
 - Want a robust starting point for Nuxt.js projects.
@@ -26,9 +25,7 @@ This layer is best suited for developers who:
 
 By leveraging this base layer, developers can save time and reduce the complexity of initial project setup, focusing on delivering high-quality features efficiently.
 
-
 ## Installation
-
 Setting up this layer is straightforward by connecting it directly from the Git repository.
 
 1. **Add the Layer**: Extend the layer in `nuxt.config.ts` by adding it from GitHub:
@@ -67,8 +64,8 @@ nuxt prepare
 ## Modules
 
 ### Expose Module
-
 It serves as a utility to generate and expose predefined folders, files, and configurations for seamless project setup. This module provides options to create a consistent environment by exposing theme, Prisma, and Docker configurations based on project requirements.\
+
 The module dynamically generates:
  - Theme-related folders and files.
  - Prisma configurations.
@@ -110,8 +107,7 @@ The module generates the following outputs based on the configuration:
 > We will examine each of the mentioned options in detail in the following paragraphs. 
 
 ### API Generation Module
-
-The API Generation Module simplifies API calls by automatically generating composables from files in the `server/api` directory. Instead of using `useFetch` with string routes, you can use a generated composable like `api().auth.login({ login, password })`. It ensures type safety through `ts-morph`, which infers input and output types.
+It simplifies API calls by automatically generating composables from files in the `server/api` directory. Instead of using `useFetch` with string routes, you can use a generated composable like `api().auth.login({ login, password })`. It ensures type safety through `ts-morph`, which infers input and output types.
 
 #### API File Requirements:
 - Place all API endpoint files in the `server/api` directory.
@@ -157,7 +153,6 @@ const info = api().auth.loginAsync({ login, password });
 ---
 
 #### useNonSSRFetch Composable
-
 The composable is a utility designed to facilitate client-side-only data fetching. It ensures that fetch operations are executed exclusively in the browser, avoiding potential conflicts with server-side rendering (SSR). This composable supports various configurations, enabling flexibility for dynamic data retrieval through reactive inputs and customizable options.
 
 **Parameters:**
@@ -265,14 +260,13 @@ Define color variables for themes. For example:
 This file contains global styles for reusable UI components such as buttons, inputs, and other elements.
 
 #### useTheme Composable
-
 A composable for managing and toggling themes, specifically designed to integrate with Naive UI for theme-based styling overrides. It offers a flexible setup for controlling themes within a Nuxt 3 application, with built-in support for dark and light modes.
 
-**Parameters:**
+**Parameters**
 - `options (ptional)`: An object containing:
   - `naiveUIStyles`: An object of type `GlobalThemeOverrides` for custom Naive UI style overrides.
 
-**Returns:**
+**Returns**
 - `toggleTheme`: Toggles between light and dark themes.
 - `setTheme`: Sets a specific theme by name.
 - `themeName`: Current theme name.
@@ -295,16 +289,15 @@ const { themeUI } = useTheme({ naiveUIStyles: styles });
 ---
 
 #### useColorChooser Composable
-
 A utility composable for dynamically selecting colors based on the active theme. Designed to support applications with multiple themes (e.g., light, dark) and provides a reactive way to resolve theme-specific colors.
 
-**Parameters:**
+**Parameters**
 The returned function accepts:
 - `light (string | Layer.Color)`: The color to use in the light theme.
 - `dark (string | Layer.Color)`: The color to use in the dark theme.
 - `<some_theme> (string | Layer.Color)`: The color to use in a custom theme.
 
-**Returns:**
+**Returns**
 A function with the following signature:
 - `(light: Layer.Color, dark: Layer.Color) => ComputedRef<string>`
 - `(light: string, dark: Layer.Color) => ComputedRef<string>`
@@ -330,7 +323,6 @@ const backgroundColor = chooseColor('primary', 'primary-disabled');
 ---
 
 #### colors Utility Function
-
 A utility function to dynamically resolve color values based on either direct color codes (e.g., `#hex`, `rgb(...)`) or CSS custom properties (e.g., `--variable-name`).
 
 **Parameters:**
@@ -361,7 +353,6 @@ console.log(primaryColor); // Output: '#505690'
 ---
 
 #### useThemeNames Composable
-
 A simple composable that returns an array of available theme names for the application. Useful for dynamically managing or displaying theme options.
 
 **Returns:**
@@ -375,7 +366,6 @@ console.log(themeNames);
 ```
 
 ### Auth Module
-
 Provides a comprehensive solution for managing authentication in the application. It includes client-side utilities, server-side middleware, and API endpoints to handle common authentication tasks such as login, signup, signout, and session validation.
 
 #### Components and Files
@@ -473,7 +463,6 @@ if (isAuthenticated.value) {
 ## Features
 
 ### Icons Engine
-
 Provides streamlined icon usage with **[Iconify](https://icon-sets.iconify.design/)** and `unplugin-icons`, automatically downloading and importing icons based on usage.
 
 ```vue
@@ -490,7 +479,6 @@ For auto-installing and importing, `unplugin-icons` requires a prefix `i` for ev
 ### Components
 
 #### c-form Component
-
 A wrapper for organizing input elements and managing validation details.
 
 **Key Features:**
@@ -508,7 +496,6 @@ A wrapper for organizing input elements and managing validation details.
 ---
 
 #### c-input Component
-
 A versatile input component supporting multiple types and validation rules.
 
 **Supported Types:**
@@ -536,10 +523,9 @@ A versatile input component supporting multiple types and validation rules.
 ---
 
 #### NaiveUIWrapper Component
-
 A wrapper for the `n-config-provider` from Naive UI. Provides centralized setup for localization, theme overrides, and dialog management.
 
-**Props:**
+**Props**
 - `locale (optional)`: Locale settings, defaulting to `ukUA`.
 - `dateLocale (optional)`: Date locale settings, defaulting to `ukUA`.
 - `theme (optional)`: Theme overrides, defaulting to the theme from `useTheme`.
@@ -551,19 +537,16 @@ A wrapper for the `n-config-provider` from Naive UI. Provides centralized setup 
 </NaiveUIWrapper>
 ```
 
-### Helper Composables
+### Helper Composables - Client
 
 #### useControlTabs
-
 It simplifies the management of tab-based navigation within a Nuxt application. It enables reactive tab states synchronized with the route query parameters and provides utility methods for tab-related logic.
 
 **Parameters**
-
  - `defaultTab: string`: Specifies the default tab to activate if no `tab` query parameter is present.
  - `executableFunction: Record<string, () => void> (optional)`: a record of tab names mapped to callback functions. The corresponding function is executed when its tab becomes active.
 
 **Returns**
-
 - `activeTab: Ref<string>`: a reactive reference representing the currently active tab. The value is synchronized with the `tab` query parameter in the URL.
 - `onTabChange: () => void`: updates the route query to reflect the current `activeTab` value. Executes the corresponding function from `executableFunction` if defined.
 - `whenQuery: (val: string) => boolean`: checks if the current `tab` query parameter matches the given value.
@@ -588,6 +571,87 @@ onMounted(() => {
 > [!IMPORTANT]
 > This composable heavily relies on Vue Router's `useRouter` and `useRoute`.\
 > Ensure that your routes include a `tab` query parameter to fully utilize this composable.
+
+### Helper Composables - Sever
+
+#### useData 
+It retrieves and validates data from the current request context.
+
+**Parameters**
+ - `kind: RequestTypes`: specifies the type of data to retrieve (`body`, `query`, or `params`).
+ - `validators?: Validators<T>`: a Joi schema for validating the data. Optional.
+
+**Returns**
+ - The validated data if `validators` is provided.
+ - The raw data if `validators` is not provided.
+
+**Throws**
+- A `NuxtError` with a status code of `422` if validation fails.
+
+**Example**
+```typescript
+const data = await useData('body', {
+  name: Joi.string().required(),
+  age: Joi.number().min(18),
+});
+console.log(data.name, data.age);
+```
+
+---
+
+#### usePrisma
+Provides access to the shared Prisma Client instance.
+
+**Returns**
+  - The Prisma Client instance.
+
+**Example**:
+```typescript
+const prisma = usePrisma();
+const users = await prisma.user.findMany();
+console.log(users);
+```
+
+---
+
+#### setSession
+Sets or updates the user session data.
+
+**Parameters**
+  - `data: Layer.SessionData`: The session data to set or update.
+
+**Returns**
+  - The result of the session update operation.
+
+**Example**:
+```typescript
+await setSession({
+  userId: 1,
+  roles: ['admin'],
+});
+```
+
+---
+
+#### getUser
+Retrieves the current user's session data.
+
+**Returns**
+  - The user's session data, if available.
+
+**Example**
+```typescript
+const user = await getUser();
+if (user) {
+  console.log(`User ID: ${user.userId}`);
+}
+```
+
+---
+
+> [!IMPORTANT]
+> **Error Handling**: Ensure proper error handling when using these utilities, especially for `useData` and `setSession`.
+> **Session Management**: The `setSession` and `getUser` functions rely on runtime configuration and session handling middleware.
 
 ### Prisma
 
@@ -652,7 +716,6 @@ The following npm scripts related to Prisma are defined in `package.json`:
 > Use Prisma migrations to manage schema evolution systematically.
 
 ### Docker
-
 The **Dockerfile** for this project is dynamically generated by the `expose` module. It provides a robust containerized environment tailored for development purposes, supporting both application and database configurations.\
 The `exposeDocker` option in the `baseLayerExpose` module enables the following capabilities:
 
