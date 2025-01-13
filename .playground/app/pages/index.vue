@@ -67,41 +67,40 @@ const { activeTab, onTabChange, whenQuery } = useControlTabs('todo', {
   reminder: async () => await executeReminders({ _initial: true }),
 })
 
-const { data: todos, execute: executeTodos } = await api().todo.list({}, { immediate: whenQuery('todo') })
-const { data: reminders, execute: executeReminders } = await api().reminder.list(
-  {},
-  { immediate: whenQuery('reminder') }
-)
+const { data: todos, execute: executeTodos } = api().todo.list({}, { immediate: whenQuery('todo') })
+const { data: reminders, execute: executeReminders } = api().reminder.list({}, { immediate: whenQuery('reminder') })
 
 async function addTodo() {
   if (!newTodo.value) useMessage().error('Please add a todo')
-  const { data: todo } = await api().todo.add({ task: newTodo.value, done: false })
-  todos.value.push(todo.value)
+  const todo = await api().todo.addAsync({ task: newTodo.value, done: false })
+  todos.value.push(todo)
   newTodo.value = ''
 }
 
 async function removeTodo(id: number) {
-  const { data } = await api().todo.remove({ id })
-  if (!data.value) return
+  const data = await api().todo.removeAsync({ id })
+  if (!data) return
 
   todos.value = todos.value.filter(t => t.id !== id)
 }
 
 async function closeTodo(id: number, done: boolean) {
-  await api().todo.close({ id, done })
+  await api().todo.closeAsync({ id, done })
 }
 
 async function addReminder() {
   if (!(newReminderText.value && newReminderTime.value)) useMessage().error('Please add a reminder')
-  const { data: reminder } = await api().reminder.add({ task: newReminderText.value, date: newReminderTime.value })
-  reminders.value.push(reminder.value)
+
+  const reminder = await api().reminder.addAsync({ task: newReminderText.value, date: newReminderTime.value })
+  reminders.value.push(reminder)
+
   newReminderText.value = ''
   newReminderTime.value = null
 }
 
 async function removeReminder(id: number) {
-  const { data } = await api().reminder.remove({ id })
-  if (!data.value) return
+  const data = await api().reminder.removeAsync({ id })
+  if (!data) return
 
   reminders.value = reminders.value.filter(t => t.id !== id)
 }

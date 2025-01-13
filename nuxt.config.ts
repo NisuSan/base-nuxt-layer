@@ -3,10 +3,13 @@ import Components from 'unplugin-vue-components/vite'
 import Icons from 'unplugin-icons/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import IconsResolver from 'unplugin-icons/resolver'
-import { localPath } from './utils/index.server'
+import { localPath } from './utils'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
+  future: {
+    compatibilityVersion: 4,
+  },
   build: {
     transpile: [
       '@juggle/resize-observer',
@@ -15,7 +18,7 @@ export default defineNuxtConfig({
         : []),
     ],
   },
-  css: ['./assets/tailwind.css'],
+  css: ['./app/assets/tailwind.css'],
   devtools: { enabled: true },
   modules: ['nuxtjs-naive-ui', 'unplugin-icons/nuxt', '@nuxtjs/google-fonts'],
   vite: {
