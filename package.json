@@ -43,6 +43,8 @@
     "fast-glob": "^3.3.3",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "node-xlsx": "^0.24.0",
+    "nuxt-file-storage": "^0.2.9",
     "nuxtjs-naive-ui": "^1.0.2",
     "tailwindcss": "4.0.0-beta.8",
     "ts-morph": "^25.0.0",

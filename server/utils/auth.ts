@@ -147,10 +147,11 @@ export function useSignout() {
 }
 
 async function generateJwt() {
+  const config = useRuntimeConfig()
   return (await import('jsonwebtoken')).default.sign(
     { info: new Date(), scope: ['accsess'] },
-    useRuntimeConfig().baseLayer.auth.jwtSecret,
-    { expiresIn: useRuntimeConfig().public.baseLayer.auth.jwtExpiresIn }
+    config.baseLayer.auth.jwtSecret,
+    { expiresIn: config.public.baseLayer.auth.jwtExpiresIn }
   )
 }
 
