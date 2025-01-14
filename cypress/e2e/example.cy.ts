@@ -2,15 +2,15 @@ describe('Test general tabs functionalities', () => {
   const tabs = [
     { tab: 'todo', name: 'ToDo' },
     { tab: 'reminder', name: 'Reminder' },
+    { tab: 'files', name: 'Files' },
   ]
 
-  it('Has tabs ToDo and Reminder', () => {
+  it(`Has tabs ${tabs.map(x => x.name).join(', ')}`, () => {
     cy.visit('/')
 
     cy.get('.n-tabs').should('be.visible')
-    cy.get('.n-tabs-tab').should('have.length', 2)
-    cy.get('.n-tabs-tab').eq(0).should('have.text', 'ToDo')
-    cy.get('.n-tabs-tab').eq(1).should('have.text', 'Reminder')
+    cy.get('.n-tabs-tab').should('have.length', tabs.length)
+    tabs.forEach((x, i) => cy.get('.n-tabs-tab').eq(i).should('have.text', x.name))
   })
 
   it('By default selected tab is ToDo', () => {
