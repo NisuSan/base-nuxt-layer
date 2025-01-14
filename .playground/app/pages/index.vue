@@ -48,6 +48,14 @@
           </n-empty>
         </div>
       </n-tab-pane>
+      <n-tab-pane name="files" tab="Files">
+        <div style="width: fit-content;" class="flex flex-col">
+          <div style="width: fit-content;">
+            <input class="files-input" type="file" @input="handleFileInput" />
+            <n-button type="primary" class="file-upload mt-2" :disabled="files.length === 0" @click="uploadFiles()">Upload</n-button>
+          </div>
+        </div>
+      </n-tab-pane>
     </n-tabs>
     <div class="toggle-theme cursor-pointer p-2 border border-main-brand rounded inline-block absolute -top-1 right-2" @click="toggleTheme()">
       <IFa6SolidSun v-if="themeName === 'dark'" width="1.1rem" height="1.1rem" class="toggle-theme-sun"/>
@@ -69,6 +77,7 @@ const { activeTab, onTabChange, whenQuery } = useControlTabs('todo', {
 
 const { data: todos, execute: executeTodos } = api().todo.list({}, { immediate: whenQuery('todo') })
 const { data: reminders, execute: executeReminders } = api().reminder.list({}, { immediate: whenQuery('reminder') })
+const { handleFileInput, files } = useFileStorage({ clearOldFiles: true })
 
 async function addTodo() {
   if (!newTodo.value) useMessage().error('Please add a todo')
@@ -103,6 +112,11 @@ async function removeReminder(id: number) {
   if (!data) return
 
   reminders.value = reminders.value.filter(t => t.id !== id)
+}
+
+async function uploadFiles() {
+  const data = await api().uploadAsync(files.value)
+  console.log(data)
 }
 </script>
 
