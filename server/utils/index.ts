@@ -5,7 +5,7 @@ import type { ServerFile } from 'nuxt-file-storage'
 type RequestTypes = 'body' | 'query' | 'params'
 type Validators<T> = { [K in keyof T]: Joi.AnySchema | Joi.Reference }
 type Profile = { firstName: string; lastName: string; middleName: string }
-type FileUploadingOptions = { save?: boolean, folderToSave?: string }
+type FileUploadingOptions = { save?: boolean; folderToSave?: string }
 
 /**
  * Get the data from the current request context.
@@ -34,10 +34,12 @@ export function usePrisma() {
 
 export async function setSession(data: Layer.SessionData) {
   const config = useRuntimeConfig()
-  return (await useSession(useEvent(), {
-    password: config.baseLayer.auth.sesionPrivateKey,
-    maxAge : config.public.baseLayer.auth.jwtExpiresIn
-  })).update(data)
+  return (
+    await useSession(useEvent(), {
+      password: config.baseLayer.auth.sesionPrivateKey,
+      maxAge: config.public.baseLayer.auth.jwtExpiresIn,
+    })
+  ).update(data)
 }
 
 export async function getUser() {
@@ -78,9 +80,9 @@ export function useInitialFromFullName(profile: Profile, kind: 'auth' | 'regular
  */
 export async function useUploadedFiles(options?: FileUploadingOptions) {
   const files = await readBody<ServerFile[]>(useEvent())
-  if(files.length === 0) return null
+  if (files.length === 0) return null
 
-  const parsed: { binaryString: Buffer, ext: string }[] = []
+  const parsed: { binaryString: Buffer; ext: string }[] = []
 
   for (const file of files) {
     if (options?.save) {

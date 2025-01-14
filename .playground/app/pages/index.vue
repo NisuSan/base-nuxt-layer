@@ -51,8 +51,8 @@
       <n-tab-pane name="files" tab="Files">
         <div style="width: fit-content;" class="flex flex-col">
           <div style="width: fit-content;">
-            <input type="file" @input="handleFileInput" />
-            <n-button type="primary" class="files-upload mt-2" :disabled="files.length === 0" @click="uploadFiles()">Upload</n-button>
+            <input class="files-input" type="file" @input="handleFileInput" />
+            <n-button type="primary" class="file-upload mt-2" :disabled="files.length === 0" @click="uploadFiles()">Upload</n-button>
           </div>
         </div>
       </n-tab-pane>
@@ -116,8 +116,7 @@ async function removeReminder(id: number) {
 
 async function uploadFiles() {
   const data = await api().uploadAsync(files.value)
-  console.log(data);
-
+  console.log(data)
 }
 </script>
 

@@ -86,5 +86,5 @@ export default defineNuxtConfig({
   },
   fileStorage: {
     mount: process.env.FILES_MOUNT_POINT,
-  }
+  },
 })

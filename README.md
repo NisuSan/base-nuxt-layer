@@ -618,7 +618,7 @@ console.log(users);
 Sets or updates the user session data.
 
 **Parameters**
-  - `data: Layer.SessionData`: The session data to set or update.
+  - `data: Layer.SessionData`: the session data to set or update.
 
 **Returns**
   - The result of the session update operation.
@@ -647,11 +647,37 @@ if (user) {
 }
 ```
 
----
-
 > [!IMPORTANT]
 > **Error Handling**: Ensure proper error handling when using these utilities, especially for `useData` and `setSession`.
 > **Session Management**: The `setSession` and `getUser` functions rely on runtime configuration and session handling middleware.
+
+---
+
+#### useUploadedFiles
+Parse the uploaded files from the request body and optionally save them to the local filesystem.
+
+**Parameters**
+ - `options: FileUploadingOptions`: options to control the behavior of the function.
+   - `options.save: boolean`: if true, the files are saved to the local filesystem
+   - `options.folderToSave: string`: folder to save the files to. If not provided, the files are saved in the root of mounted folder
+
+**Returns**
+  - An array of objects with the binary string and the file extension of each uploaded file.
+
+```typescript
+import type { ClientFile } from 'nuxt-file-storage'
+
+export default defineEventHandler<_, ClientFile[]>(async event => {
+  const files = await useUploadedFiles()
+  //...
+})
+```
+
+> [!NOTE]
+> This function is based on the [nuxt-file-storage package](https://github.com/nyllre/nuxt-file-storage).\
+> For more details visit the original docs.
+
+---
 
 ### Prisma
 

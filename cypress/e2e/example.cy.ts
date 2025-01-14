@@ -161,6 +161,34 @@ describe('Test color mode change', () => {
   }
 })
 
+describe('Test file unplugin', () => {
+  beforeEach(() => cy.visit('/?tab=files'))
+
+  it('Upload 1 file', () => {
+    cy.get('.file-upload').should('be.disabled')
+    cy.get('.files-input').should('have.value', '')
+
+    cy.get('.files-input').selectFile('cypress/fixtures/example.json')
+    cy.get('.file-upload').should('not.be.disabled').click()
+
+    cy.intercept('POST', '/api/upload', request => {
+      expect(request.body).to.be.true
+    })
+  })
+
+  it('Upload multiple files', () => {
+    cy.get('.file-upload').should('be.disabled')
+    cy.get('.files-input').should('have.value', '')
+
+    cy.get('.files-input').selectFile(['cypress/fixtures/example.json', 'cypress/fixtures/example2.json'])
+    cy.get('.file-upload').should('not.be.disabled').click()
+
+    cy.intercept('POST', '/api/upload', request => {
+      expect(request.body).to.be.true
+    })
+  })
+})
+
 function inputPanel(tab: 'todo' | 'reminder') {
   cy.get('.c-input')
     .should('be.visible')
