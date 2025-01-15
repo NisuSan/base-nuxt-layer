@@ -37,6 +37,7 @@
     "@nuxtjs/google-fonts": "^3.2.0",
     "@tailwindcss/vite": "4.0.0-beta.8",
     "@vueuse/core": "^12.3.0",
+    "@vueuse/nuxt": "^12.4.0",
     "ansis": "^3.6.0",
     "boxen": "^8.0.1",
     "cyrillic-to-translit-js": "^3.2.1",
