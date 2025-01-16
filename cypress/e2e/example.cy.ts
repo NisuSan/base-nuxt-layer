@@ -3,6 +3,7 @@ describe('Test general tabs functionalities', () => {
     { tab: 'todo', name: 'ToDo' },
     { tab: 'reminder', name: 'Reminder' },
     { tab: 'files', name: 'Files' },
+    { tab: 'grid', name: 'Grid' },
   ]
 
   it(`Has tabs ${tabs.map(x => x.name).join(', ')}`, () => {
