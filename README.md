@@ -537,6 +537,32 @@ A wrapper for the `n-config-provider` from Naive UI. Provides centralized setup 
 </NaiveUIWrapper>
 ```
 
+#### d-container Component
+The responsive layout component that dynamically adjusts its column structure based on the number of child elements and screen width.
+
+**Features**
+ - `Dynamic Columns`: Automatically adjusts the number of columns based on:
+ - `Screen width`: Smaller screens have fewer columns (e.g., 1 column for <640px).
+ - `Child elements`: Columns are capped between minColumns and maxColumns.
+ - `Customizable Gaps`: Allows fine-tuning of spacing with gap, gapX, and gapY.
+
+**Props**
+ - `minColumns: number (optional)`: specifies the minimum number of columns in the grid, defaulting to 2.
+ - `maxColumns: number (optional)`: specifies the maximum number of columns in the grid, defaulting to 4.
+ - `gap (optional)`: sets the uniform gap between grid items (applies to both rows and columns), defaulting to `1rem`.
+ - `gapX (optional)`: overrides the horizontal gap between grid items.
+ - `gapY (optional)`: overrides the vertical gap between grid items.
+
+```vue
+<d-container>
+  <input type="text">
+  <input type="text">
+  <input type="text">
+  <input type="text">
+  <input type="text">
+</d-container>
+```
+
 ### Helper Composables - Client
 
 #### useControlTabs

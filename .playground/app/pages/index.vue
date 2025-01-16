@@ -56,6 +56,16 @@
           </div>
         </div>
       </n-tab-pane>
+      <n-tab-pane name="grid" tab="Grid">
+        <d-container :max-columns="5">
+          <input class="bg-white" type="text">
+          <input class="bg-white" type="text">
+          <input class="bg-white" type="text">
+          <input class="bg-white" type="text">
+          <input class="bg-white" type="text">
+          <input class="bg-white" type="text">
+        </d-container>
+      </n-tab-pane>
     </n-tabs>
     <div class="toggle-theme cursor-pointer p-2 border border-main-brand rounded inline-block absolute -top-1 right-2" @click="toggleTheme()">
       <IFa6SolidSun v-if="themeName === 'dark'" width="1.1rem" height="1.1rem" class="toggle-theme-sun"/>
