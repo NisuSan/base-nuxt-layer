@@ -2,15 +2,16 @@ describe('Test general tabs functionalities', () => {
   const tabs = [
     { tab: 'todo', name: 'ToDo' },
     { tab: 'reminder', name: 'Reminder' },
+    { tab: 'files', name: 'Files' },
+    { tab: 'grid', name: 'Grid' },
   ]
 
-  it('Has tabs ToDo and Reminder', () => {
+  it(`Has tabs ${tabs.map(x => x.name).join(', ')}`, () => {
     cy.visit('/')
 
     cy.get('.n-tabs').should('be.visible')
-    cy.get('.n-tabs-tab').should('have.length', 2)
-    cy.get('.n-tabs-tab').eq(0).should('have.text', 'ToDo')
-    cy.get('.n-tabs-tab').eq(1).should('have.text', 'Reminder')
+    cy.get('.n-tabs-tab').should('have.length', tabs.length)
+    tabs.forEach((x, i) => cy.get('.n-tabs-tab').eq(i).should('have.text', x.name))
   })
 
   it('By default selected tab is ToDo', () => {
@@ -159,6 +160,34 @@ describe('Test color mode change', () => {
       cy.get(`.toggle-theme-${th.i}`).should('be.visible')
     })
   }
+})
+
+describe('Test file unplugin', () => {
+  beforeEach(() => cy.visit('/?tab=files'))
+
+  it('Upload 1 file', () => {
+    cy.get('.file-upload').should('be.disabled')
+    cy.get('.files-input').should('have.value', '')
+
+    cy.get('.files-input').selectFile('cypress/fixtures/example.json')
+    cy.get('.file-upload').should('not.be.disabled').click()
+
+    cy.intercept('POST', '/api/upload', request => {
+      expect(request.body).to.be.true
+    })
+  })
+
+  it('Upload multiple files', () => {
+    cy.get('.file-upload').should('be.disabled')
+    cy.get('.files-input').should('have.value', '')
+
+    cy.get('.files-input').selectFile(['cypress/fixtures/example.json', 'cypress/fixtures/example2.json'])
+    cy.get('.file-upload').should('not.be.disabled').click()
+
+    cy.intercept('POST', '/api/upload', request => {
+      expect(request.body).to.be.true
+    })
+  })
 })
 
 function inputPanel(tab: 'todo' | 'reminder') {

@@ -537,6 +537,32 @@ A wrapper for the `n-config-provider` from Naive UI. Provides centralized setup 
 </NaiveUIWrapper>
 ```
 
+#### d-container Component
+The responsive layout component that dynamically adjusts its column structure based on the number of child elements and screen width.
+
+**Features**
+ - `Dynamic Columns`: Automatically adjusts the number of columns based on:
+ - `Screen width`: Smaller screens have fewer columns (e.g., 1 column for <640px).
+ - `Child elements`: Columns are capped between minColumns and maxColumns.
+ - `Customizable Gaps`: Allows fine-tuning of spacing with gap, gapX, and gapY.
+
+**Props**
+ - `minColumns: number (optional)`: specifies the minimum number of columns in the grid, defaulting to 2.
+ - `maxColumns: number (optional)`: specifies the maximum number of columns in the grid, defaulting to 4.
+ - `gap (optional)`: sets the uniform gap between grid items (applies to both rows and columns), defaulting to `1rem`.
+ - `gapX (optional)`: overrides the horizontal gap between grid items.
+ - `gapY (optional)`: overrides the vertical gap between grid items.
+
+```vue
+<d-container>
+  <input type="text">
+  <input type="text">
+  <input type="text">
+  <input type="text">
+  <input type="text">
+</d-container>
+```
+
 ### Helper Composables - Client
 
 #### useControlTabs
@@ -618,7 +644,7 @@ console.log(users);
 Sets or updates the user session data.
 
 **Parameters**
-  - `data: Layer.SessionData`: The session data to set or update.
+  - `data: Layer.SessionData`: the session data to set or update.
 
 **Returns**
   - The result of the session update operation.
@@ -647,11 +673,37 @@ if (user) {
 }
 ```
 
----
-
 > [!IMPORTANT]
 > **Error Handling**: Ensure proper error handling when using these utilities, especially for `useData` and `setSession`.
 > **Session Management**: The `setSession` and `getUser` functions rely on runtime configuration and session handling middleware.
+
+---
+
+#### useUploadedFiles
+Parse the uploaded files from the request body and optionally save them to the local filesystem.
+
+**Parameters**
+ - `options: FileUploadingOptions`: options to control the behavior of the function.
+   - `options.save: boolean`: if true, the files are saved to the local filesystem
+   - `options.folderToSave: string`: folder to save the files to. If not provided, the files are saved in the root of mounted folder
+
+**Returns**
+  - An array of objects with the binary string and the file extension of each uploaded file.
+
+```typescript
+import type { ClientFile } from 'nuxt-file-storage'
+
+export default defineEventHandler<_, ClientFile[]>(async event => {
+  const files = await useUploadedFiles()
+  //...
+})
+```
+
+> [!NOTE]
+> This function is based on the [nuxt-file-storage package](https://github.com/nyllre/nuxt-file-storage).\
+> For more details visit the original docs.
+
+---
 
 ### Prisma
 

@@ -234,11 +234,11 @@ function writeEnvFile(text: string, commentTitle?: string) {
       }
 
       if (data.split('\n').length > 3) {
-        writeFileSync(rootPath(file), env + data)
+        writeFileSync(rootPath(file), data + env)
         result.push(true)
       }
     } else {
-      writeFileSync(rootPath(file), data + splitedEnvs.map(line => `${line[0]}=${line[1]}`).join('\n'))
+      writeFileSync(rootPath(file), splitedEnvs.map(line => `${line[0]}=${line[1]}`).join('\n') + data)
       result.push(true)
     }
   }

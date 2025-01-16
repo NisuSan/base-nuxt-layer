@@ -20,7 +20,7 @@ export default defineNuxtConfig({
   },
   css: ['./app/assets/tailwind.css'],
   devtools: { enabled: true },
-  modules: ['nuxtjs-naive-ui', 'unplugin-icons/nuxt', '@nuxtjs/google-fonts'],
+  modules: ['nuxtjs-naive-ui', 'unplugin-icons/nuxt', '@nuxtjs/google-fonts', 'nuxt-file-storage', '@vueuse/nuxt'],
   vite: {
     optimizeDeps: {
       include:
@@ -83,5 +83,8 @@ export default defineNuxtConfig({
       Inter: [400, 500, 600],
       'JetBrains Mono': [400, 500, 600],
     },
+  },
+  fileStorage: {
+    mount: process.env.FILES_MOUNT_POINT,
   },
 })

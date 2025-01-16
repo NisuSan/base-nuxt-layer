@@ -56,7 +56,7 @@ export async function useSignin(): Promise<Layer.User> {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV !== 'development',
-    maxAge: useRuntimeConfig().baseLayer.auth.jwtExpiresIn,
+    maxAge: useRuntimeConfig().public.baseLayer.auth.jwtExpiresIn,
     path: '/',
   })
 
@@ -147,11 +147,12 @@ export function useSignout() {
 }
 
 async function generateJwt() {
-  const { jwtSecret, jwtExpiresIn } = useRuntimeConfig().baseLayer.auth
-
-  return (await import('jsonwebtoken')).default.sign({ info: new Date(), scope: ['accsess'] }, jwtSecret, {
-    expiresIn: jwtExpiresIn,
-  })
+  const config = useRuntimeConfig()
+  return (await import('jsonwebtoken')).default.sign(
+    { info: new Date(), scope: ['accsess'] },
+    config.baseLayer.auth.jwtSecret,
+    { expiresIn: config.public.baseLayer.auth.jwtExpiresIn }
+  )
 }
 
 function makeSafeUser(user: FullUser) {
