@@ -20,13 +20,7 @@ export default defineNuxtConfig({
   },
   css: ['./app/assets/tailwind.css'],
   devtools: { enabled: true },
-  modules: [
-    'nuxtjs-naive-ui',
-    'unplugin-icons/nuxt',
-    '@nuxtjs/google-fonts',
-    'nuxt-file-storage',
-    '@vueuse/nuxt'
-  ],
+  modules: ['nuxtjs-naive-ui', 'unplugin-icons/nuxt', '@nuxtjs/google-fonts', 'nuxt-file-storage', '@vueuse/nuxt'],
   vite: {
     optimizeDeps: {
       include:

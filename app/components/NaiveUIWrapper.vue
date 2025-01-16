@@ -31,8 +31,6 @@ const props = withDefaults(
 
 const isLoaded = ref(false)
 const { themeUI } = useTheme({ naiveUIStyles: props.theme })
-console.log(themeUI.value);
-
 
 onMounted(() => {
   isLoaded.value = true
